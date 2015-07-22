@@ -1,0 +1,21 @@
+{
+  "name": "web-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "fairmont-reactive": "^1.0.0-beta-18",
+    "jquery": "^2.1.4"
+  },
+  "devDependencies": {
+    "browserify": "^11.0.0",
+    "fairmont": "^1.0.0-beta-19",
+    "jade": "^1.11.0"
+  },
+  "scripts": {
+    "build": "coffee --nodejs --harmony script/build.coffee",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
