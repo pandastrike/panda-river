@@ -4,7 +4,7 @@
 
       {curry} = require "fairmont-core"
       {async} = require "fairmont-helpers"
-      {iterator} = require "./iterator"
+      {iterator, asyncIterator} = require "./iterator"
       {reduce} = require "./reducer"
 
       flow = ([i, fx...]) -> reduce i, ((i,f) -> f i), fx
@@ -24,7 +24,7 @@
       # TODO: need to add synchronous version
 
       pump = curry (s, i) ->
-        iterator ->
+        asyncIterator async ->
           {done, value} = yield i()
           if !done
             value: (s.write value)
@@ -38,7 +38,7 @@
       # TODO: need to add synchronous version
 
       tee = curry (f, i) ->
-        iterator ->
+        asyncIterator async ->
           {done, value} = yield i()
           (f value) unless done
           {done, value}
@@ -48,7 +48,7 @@
 
       throttle = curry (ms, i) ->
         last = 0
-        iterator ->
+        asyncIterator async ->
           loop
             {done, value} = yield i()
             break if done
