@@ -371,7 +371,7 @@ Given a function and an iterator, produce a new iterator whose values are delimi
 ---
 
     module.exports = {isIterable, isAsyncIterable,
-      iterator, isIterator, isAsyncIterator,
+      iterator, asyncIterator, isIterator, isAsyncIterator,
       isIteratorFunction, isAsyncIteratorFunction, iteratorFunction,
       repeat, map, select, reject, filter, project, compact,
       partition, where, take, takeN, events, stream, lines, split}

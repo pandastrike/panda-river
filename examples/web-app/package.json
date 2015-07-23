@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
-    "fairmont-reactive": "^1.0.0-beta-18",
+    "fairmont-reactive": "^1.0.0-beta-19",
     "jquery": "^2.1.4"
   },
   "devDependencies": {
