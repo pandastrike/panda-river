@@ -6,5 +6,5 @@ $ ->
 
   start flow [
     events "click", $("a")
-    map -> console.log "You clicked me!"
+    map -> console.log "You clicked me, part 2!"
   ]

@@ -1,29 +1,11 @@
 {createWriteStream} = require "fs"
-{join, basename} = require "path"
-{glob, read, write, mkdirp, partial, _, isPromise,
-  start, flow, map, async} = require "fairmont"
-jade = require "jade"
-coffee = require "coffee-script"
+{join} = require "path"
+{mkdirp, start, flow, map, async} = require "fairmont"
+{glob, compileJade, compileCoffeeScript,
+  writeFile, watchFile} = require "./helpers"
 browserify = require "browserify"
 express = require "express"
 morgan = require "morgan"
-
-glob = partial glob, _, "./"
-
-compileJade = (path) ->
-  filename = basename path, ".jade"
-  [filename, (do jade.compileFile path)]
-
-compileCoffeeScript = async (path) ->
-  filename = basename path, ".coffee"
-  [filename, (coffee.compile (yield read path))]
-
-writeFile = (directory, extension) ->
-  async (x) ->
-    if isPromise x
-      x = yield x
-    [filename, content] = x
-    yield write join directory, "#{filename}.#{extension}"
 
 {task} = require "./task"
 
@@ -52,6 +34,20 @@ task "bundle", "code", async ->
     map (path) -> b.add path
   ]
   b.bundle().pipe createWriteStream join "build", "app.js"
+
+task "watch-templates", async ->
+  yield start flow [
+    yield glob "src/*.jade"
+    map watchFile -> task "templates"
+  ]
+
+task "watch-code", async ->
+  yield start flow [
+    yield glob "src/*.coffee"
+    map watchFile -> task "bundle"
+  ]
+
+task "watch", "watch-code", "watch-templates"
 
 task "serve", ->
   app = express()

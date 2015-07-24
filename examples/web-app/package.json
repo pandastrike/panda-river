@@ -10,7 +10,7 @@
   "devDependencies": {
     "browserify": "^11.0.0",
     "express": "^4.13.1",
-    "fairmont": "^1.0.0-beta-19",
+    "fairmont": "^1.0.0-beta-20",
     "jade": "^1.11.0",
     "morgan": "^1.6.1"
   },

@@ -1,4 +1,4 @@
-{start, flow, map, async, isString} = require "fairmont"
+{start, flow, map, async, isString, asyncIterator} = require "fairmont"
 
 apply = async (f) -> yield f()
 
@@ -29,8 +29,24 @@ task = async (name, tasks..., f) ->
       if !started
         started = true
         console.log "Task '#{name}' is starting…"
-        start flow [ tasks, (map lookup), (map apply) ]
+        {collect} = require "fairmont"
+        resets = yield collect flow [
+          tasks
+          map lookup
+          map apply
+          # TODO: ugh
+          # okay: the reason for this little mess is that we don't have a way
+          # to convert a sync iterator into an async iterator based on the
+          # return value from the iterator (or any other way, besides writing
+          # a little wrapper function like this. the task function is async
+          # so the map iterator ultimately returns a promise
+          (i) ->
+            asyncIterator async ->
+              {done, value} = i()
+              if done then {done} else {done, value: yield value}
+        ]
         yield f?()
         console.log "Task '#{name}' is done."
+        started = false
 
 module.exports = {task}
