@@ -29,7 +29,7 @@ Again, it would have been simpler to just write `s.pipe(s)`, but the point here 
 
 Here's another simple function that takes a server that emits connection events and returns an iterator that produces connections. We're curry `events` here, so that the resulting function need only take a connection to produce an iterator. Also, the `events` function can take an event map, which allows the iterator to return `done` as `true` when it gets a `close` event.
 
-    connections = events name: "connection", end: "close", error: "error"
+    connections = events name: "connection", end: "close"
 
 We're ready to start our main flow.
 

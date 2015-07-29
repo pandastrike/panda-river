@@ -122,6 +122,30 @@ Now we can define the trivial case, where we already have an iterator function a
       (either isIteratorFunction, isAsyncIteratorFunction),
       identity
 
+We also want to be able to convert a promise that resolves into an iterable into an iterator function.
+
+    Method.define iteratorFunction, isPromise, (p) ->
+      _p = p.then (x) -> iteratorFunction x
+      asyncIterator -> _p.then (i) -> i()
+
+## pull
+
+Transform a synchronous iterator into an asynchronous iterator by extracting a Promise from the value produced by the iterator. The extracted Promise yields the value the original promise resolves to.
+
+    pull = Method.create()
+
+    Method.define pull, isDefined, (x) -> pull iteratorFunction x
+
+    Method.define pull, isIteratorFunction, (i) ->
+      iterator ->
+        {done, value} = i()
+        if done then (W {done}) else value.then (value) -> {done, value}
+
+    Method.define pull, isAsyncIteratorFunction, (i) ->
+      asyncIterator ->
+        i().then ({done, value}) ->
+          if done then (W {done}) else value.then (value) -> {done, value}
+
 ## repeat
 
 Analogous to `wrap`for an iterator. Always produces the same value `x`.
@@ -144,7 +168,8 @@ Return a new iterator that will apply the given function to each value produced 
 
     Method.define map, Function, isAsyncIteratorFunction, (f, i) ->
       asyncIterator ->
-        i().then ({done, value}) -> {done, value: (f value)}
+        i().then ({done, value}) ->
+          if done then {done} else {done, value: (f value)}
 
     map = curry binary map
 
@@ -263,6 +288,8 @@ We use `do` here to avoid redefining `reject`.
 
       (map, source) ->
         {name, end, error} = map
+        end ?= "end"
+        error ?= "error"
         done = false
         pending = []
         resolved = []
@@ -361,5 +388,5 @@ Given a function and an iterator, produce a new iterator whose values are delimi
     module.exports = {isIterable, isAsyncIterable,
       iterator, asyncIterator, isIterator, isAsyncIterator,
       isIteratorFunction, isAsyncIteratorFunction, iteratorFunction,
-      repeat, map, select, reject, filter, project, compact,
+      pull, repeat, map, select, reject, filter, project, compact,
       partition, where, take, takeN, events, stream, lines, split}
