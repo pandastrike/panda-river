@@ -10,6 +10,9 @@ Fairmont also supports async iterators, which [are a proposed part of ES7][100].
 
 Iterators allow us to implement lazy evaluation for collection methods. In turn, this allows us to compose some iterator functions without introducing multiple iterations. For example, we can compose `map` with `select` and still only incur a single traversal of the data we're iterating over.
 
+
+    W = require "when"
+
     {identity, curry, compose, binary,
       negate} = require "fairmont-core"
 
@@ -73,7 +76,7 @@ The `asyncIterator` function is analogous to the `iterator` function—it's job 
       f[Symbol.asyncIterator] = -> @this
       f
 
-You might think we should have a way to construct an async iterator directly from a generator function, but this is the kind of thing someone might do an accident, so we generate a type error instead.
+You might think we should have a way to construct an async iterator directly from a generator function, but this is the kind of thing someone might do on accident, so we generate a type error instead.
 
 ## isIteratorFunction
 
@@ -134,25 +137,14 @@ Return a new iterator that will apply the given function to each value produced 
     Method.define map, Function, isDefined,
       (f, x) -> map f, (iteratorFunction x)
 
-    Method.define map, Function, isPromise, async (f, p) ->
-      map f, (yield p)
-
     Method.define map, Function, isIteratorFunction, (f, i) ->
       iterator ->
         {done, value} = i()
         if done then {done} else {done, value: (f value)}
 
-    # TODO add check for promise values in other async iterators
-    # TODO should sync iterators mutate into async iterators if the
-    #      given function returns a promise?
     Method.define map, Function, isAsyncIteratorFunction, (f, i) ->
-      asyncIterator async ->
-        {done, value} = yield i()
-        unless done
-          value = f value
-          if isPromise value
-            value = yield value
-        {done, value}
+      asyncIterator ->
+        i().then ({done, value}) -> {done, value: (f value)}
 
     map = curry binary map
 
@@ -175,11 +167,7 @@ Given a function and an iterator, return an iterator that produces values from t
 
     Method.define select, Function, isAsyncIteratorFunction,
       (f, i) ->
-        asyncIterator async ->
-          loop
-            {done, value} = yield i()
-            break if done || (f value)
-          {done, value}
+        asyncIterator -> W.iterator i, ({done, value}) -> done || (f value)
 
     select = filter = curry binary select
 
