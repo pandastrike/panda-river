@@ -22,6 +22,8 @@ Let's pick up a few building blocks from Fairmont.
     {spread, spread} = require "fairmont"
     {start, flow, events, select, tee, map, iterator} = require "../src"
 
+We're ready now to implement our Web server.
+
     start flow [
       events "request", server
       select spread (request) -> request.method == "GET"
