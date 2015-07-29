@@ -35,7 +35,6 @@ As always, we use `start` to run the iterator function returned by `flow`.
         ]
     ]
 
-
 We'll initialize our flow with the list of files returned by `lsR`.
 The resulting Promise will be coerced into an asynchronous iterator that produces path values.
 These are passed into `map`, which starts a nested flow.

@@ -19,6 +19,8 @@ Amen.describe "Iterator functions", (context) ->
   context.test "iteratorFunction", ->
     assert isIteratorFunction iteratorFunction [1..5]
 
+  W = require "when"
+
   context.test "map", ->
     i = map Math.sqrt, [1, 4, 9]
     assert i().value == 1
@@ -30,6 +32,11 @@ Amen.describe "Iterator functions", (context) ->
     i = select odd, [1..9]
     assert i().value == 1
     assert i().value == 3
+
+  context.test "select (reactor)", ->
+    i = select odd, W [1..9]
+    assert (yield i()).value == 1
+    assert (yield i()).value == 3
 
   context.test "reject", ->
     i = reject odd, [1..9]

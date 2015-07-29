@@ -192,7 +192,9 @@ Given a function and an iterator, return an iterator that produces values from t
 
     Method.define select, Function, isAsyncIteratorFunction,
       (f, i) ->
-        asyncIterator -> W.iterator i, ({done, value}) -> done || (f value)
+        p = (({done, value}) -> done || (f value))
+
+        asyncIterator -> W.iterate i, p, (->), i()
 
     select = filter = curry binary select
 
