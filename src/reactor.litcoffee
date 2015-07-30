@@ -44,6 +44,10 @@ This is the async variant of `isIteratorFunction`.
     isReactorFunction = isAsyncIteratorFunction = (f) ->
       (isFunction f) && (isAsyncIterator f)
 
+## reactorFunction, asyncIteratorFunction
+
+    reactorFunction = asyncIteratorFunction = Method.create()
+
     Method.define reactorFunction, isReagent,
       (x) -> reactorFunction reactor x
 
@@ -65,4 +69,5 @@ We also want to be able to convert a promise that resolves into an iterable into
 
     module.exports = {isReagent, isAsyncIterable,
       reactor, asyncIterator, isReactor, isAsyncIterator,
+      reactorFunction, asyncIteratorFunction,
       isReactorFunction, isAsyncIteratorFunction}

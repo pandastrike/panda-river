@@ -2,10 +2,8 @@
 
     {identity, curry} = require "fairmont-core"
 
-    # TODO: add this to core?
-    either = curry (f, g) -> -> (f arguments...) || (g arguments...)
-
     {Method} = require "fairmont-multimethods"
+
     {isFunction, isGenerator, isDefined,
       isPromise, async} = require "fairmont-helpers"
 

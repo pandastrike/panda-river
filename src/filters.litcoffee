@@ -1,10 +1,10 @@
 # Filters
 
-## repeat
-
-Analogous to `wrap`for an iterator. Always produces the same value `x`.
-
-    repeat = (x) -> (iterator -> done: false, value: x)
+    {curry, binary} = require "fairmont-core"
+    {isFunction, isDefined} = require "fairmont-helpers"
+    {Method} = require "fairmont-multimethods"
+    {iterator, iteratorFunction, isIteratorFunction} = require "./iterator"
+    {reactor, reactorFunction, isReactorFunction} = require "./reactor"
 
 ## map
 
@@ -13,15 +13,15 @@ Return a new iterator that will apply the given function to each value produced 
     map = Method.create()
 
     Method.define map, Function, isDefined,
-      (f, x) -> map f, (iteratorFunction x)
+      (f, x) -> map f, (producer x)
 
     Method.define map, Function, isIteratorFunction, (f, i) ->
       iterator ->
         {done, value} = i()
         if done then {done} else {done, value: (f value)}
 
-    Method.define map, Function, isAsyncIteratorFunction, (f, i) ->
-      asyncIterator ->
+    Method.define map, Function, isReactorFunction, (f, i) ->
+      reactor ->
         i().then ({done, value}) ->
           if done then {done} else {done, value: (f value)}
 
@@ -34,7 +34,7 @@ Given a function and an iterator, return an iterator that produces values from t
     select = Method.create()
 
     Method.define select, Function, isDefined,
-      (f, x) -> select f, (iteratorFunction x)
+      (f, x) -> select f, (producer x)
 
     Method.define select, Function, isIteratorFunction,
       (f, i) ->
@@ -44,11 +44,11 @@ Given a function and an iterator, return an iterator that produces values from t
             break if done || (f value)
           {done, value}
 
-    Method.define select, Function, isAsyncIteratorFunction,
+    Method.define select, Function, isReactorFunction,
       (f, i) ->
         p = (({done, value}) -> done || (f value))
 
-        asyncIterator -> W.iterate i, p, (->), i()
+        reactor -> W.iterate i, p, (->), i()
 
     select = filter = curry binary select
 
@@ -71,7 +71,7 @@ Given a function and an iterator, return an iterator that produces values from t
     partition = Method.create()
 
     Method.define partition, Number, isDefined, (n, x) ->
-      partition n, (iteratorFunction x)
+      partition n, (producer x)
 
     Method.define partition, Number, isIteratorFunction, (n, i) ->
       iterator ->
@@ -83,8 +83,8 @@ Given a function and an iterator, return an iterator that produces values from t
           break if batch.length == n
         if done then {done} else {value: batch, done}
 
-    Method.define partition, Number, isAsyncIteratorFunction, (n, i) ->
-      asyncIterator async ->
+    Method.define partition, Number, isReactorFunction, (n, i) ->
+      reactor async ->
         batch = []
         loop
           {done, value} = yield i()
@@ -97,10 +97,12 @@ Given a function and an iterator, return an iterator that produces values from t
 
 Given a function and an iterator, return an iterator that produces values from the given iterator until the given function returns false when applied to the given iterator's values.
 
+    # TODO: add asynchronous version
+
     take = Method.create()
 
     Method.define take, Function, isDefined,
-      (f, x) -> take f, (iteratorFunction x)
+      (f, x) -> take f, (producer x)
 
     Method.define take, Function, isIteratorFunction,
       (f, i) ->
@@ -128,62 +130,6 @@ Performs a `select` using a given object object. See `query`.
 
     where = curry (example, i) -> select (query example), i
 
-## events
-
-    events = Method.create()
-    isSource = compose isFunction, property "on"
-
-    Method.define events, String, isSource, (name, source) ->
-      events {name, end: "end", error: "error"}, source
-
-We use `do` here to avoid redefining `reject`.
-
-    Method.define events, Object, isSource, do (reject) ->
-
-      {promise, reject, resolve} = require "when"
-
-      (map, source) ->
-        {name, end, error} = map
-        end ?= "end"
-        error ?= "error"
-        done = false
-        pending = []
-        resolved = []
-
-        enqueue = (x) ->
-          if pending.length == 0
-            resolved.push x
-          else
-            p = pending.shift()
-            x.then(p.resolve).catch(p.reject)
-
-        dequeue = ->
-          if resolved.length == 0
-            if !done
-              promise (resolve, reject) -> pending.push {resolve, reject}
-            else
-              resolve {done}
-          else
-            resolved.shift()
-
-        source.on name, (ax...) ->
-          value = if ax.length < 2 then ax[0] else ax
-          enqueue resolve {done, value}
-        source.on end, (error) ->
-          done = true
-          enqueue resolve {done}
-        source.on error, (error) -> enqueue reject error
-
-        asyncIterator dequeue
-
-    events = curry binary events
-
-## stream
-
-Turns a stream into an iterator function.
-
-    stream = events "data"
-
 ## split
 
 Given a function and an iterator, produce a new iterator whose values are delimited based on the given function.
@@ -191,7 +137,7 @@ Given a function and an iterator, produce a new iterator whose values are delimi
     split = Method.create()
 
     Method.define split, Function, isDefined,
-      (f, x) -> split f, (iteratorFunction x)
+      (f, x) -> split f, (producer x)
 
     Method.define split, Function, isIteratorFunction, (f, i) ->
       lines = []
@@ -213,10 +159,10 @@ Given a function and an iterator, produce a new iterator whose values are delimi
           else
             {done}
 
-    Method.define split, Function, isAsyncIteratorFunction, (f, i) ->
+    Method.define split, Function, isReactorFunction, (f, i) ->
       lines = []
       remainder = ""
-      asyncIterator async ->
+      reactor async ->
         if lines.length > 0
           value: lines.shift(), done: false
         else
@@ -244,7 +190,7 @@ Given a function and an iterator, produce a new iterator whose values are delimi
 
       {curry} = require "fairmont-core"
       {async} = require "fairmont-helpers"
-      {iterator, asyncIterator} = require "./iterator"
+      {iterator, reactor} = require "./iterator"
       {reduce} = require "./reducer"
 
       flow = ([i, fx...]) -> reduce i, ((i,f) -> f i), fx
@@ -265,7 +211,7 @@ Given a function and an iterator, produce a new iterator whose values are delimi
     split = Method.create()
 
     Method.define split, Function, isDefined,
-      (f, x) -> split f, (iteratorFunction x)
+      (f, x) -> split f, (producer x)
 
     Method.define split, Function, isIteratorFunction, (f, i) ->
       lines = []
@@ -287,10 +233,10 @@ Given a function and an iterator, produce a new iterator whose values are delimi
           else
             {done}
 
-    Method.define split, Function, isAsyncIteratorFunction, (f, i) ->
+    Method.define split, Function, isReactorFunction, (f, i) ->
       lines = []
       remainder = ""
-      asyncIterator async ->
+      reactor async ->
         if lines.length > 0
           value: lines.shift(), done: false
         else
@@ -313,23 +259,24 @@ Given a function and an iterator, produce a new iterator whose values are delimi
 
     lines = split (s) -> s.toString().split("\n")
 
-
 ## tee
 
       # TODO: need to add synchronous version
 
       tee = curry (f, i) ->
-        asyncIterator async ->
-          {done, value} = yield i()
-          (f value) unless done
-          {done, value}
+        reactor ->
+          i().then ({done, value}) ->
+            (f value) unless done
+            {done, value}
 
 
 ## throttle
 
+      # TODO: need to add synchronous version
+
       throttle = curry (ms, i) ->
         last = 0
-        asyncIterator async ->
+        reactor async ->
           loop
             {done, value} = yield i()
             break if done
@@ -338,6 +285,34 @@ Given a function and an iterator, produce a new iterator whose values are delimi
           last = now
           {done, value}
 
+
+## pump
+
+Write the values produced by the iterator to a stream.
+
+    pump = Method.create()
+
+    isStreamLike = (s) ->
+      s? && (isFunction s.write) && (isFunction s.end)
+
+    Method.define pump, isStreamLike, isDefined,
+      (s, x) -> pump s, (producer x)
+
+    Method.define pump, isStreamLike, isIteratorFunction,
+      (s, i) ->
+        iterator ->
+          {done, value} = i()
+          if done then s.end() else s.write value
+
+    Method.define pump, isStreamLike, isReactorFunction,
+      reactor (s, i) ->
+        p = i()
+        p.then ({done, value}) ->
+          if done then s.end() else s.write value
+
+    pump = curry binary pump
+
 ---
 
-      module.exports = {flow, start, pump, tee, throttle}
+      module.exports = {map, select, filter, reject, project, compact,
+        partition, take, takeN, where, split, lines, tee, throttle, pump}

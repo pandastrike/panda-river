@@ -1,5 +1,14 @@
 # Adapters
 
+    {curry, binary} = require "fairmont-core"
+    {isFunction, isDefined} = require "fairmont-helpers"
+    {Method} = require "fairmont-multimethods"
+    {producer} = require "./adapters"
+    {iterator, iteratorFunction, isIteratorFunction} = require "./iterator"
+    {reactor, reactorFunction, isReactorFunction} = require "./reactor"
+
+## producer
+
 The most basic adapter simply takes a non-producer value and attempts to make it into a producer (either an iterator or reactor).
 
     producer = Method.create()
@@ -44,9 +53,7 @@ Analogous to `wrap`for an iterator. Always produces the same value `x`.
     Method.define events, String, isSource, (name, source) ->
       events {name, end: "end", error: "error"}, source
 
-We use `do` here to avoid redefining `reject`.
-
-    Method.define events, Object, isSource, do (reject) ->
+    Method.define events, Object, isSource, ->
 
       {promise, reject, resolve} = require "when"
 
@@ -100,16 +107,6 @@ Turns a stream into an iterator function.
       {reduce} = require "./reducer"
 
       flow = ([i, fx...]) -> reduce i, ((i,f) -> f i), fx
-
-## start
-
-      # TODO: need to add synchronous version
-
-      start = async (i) ->
-        loop
-          {done, value} = yield i()
-          break if done
-
 
 ## pump
 

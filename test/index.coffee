@@ -3,8 +3,10 @@ targets = process.argv[2..]
 if targets.length == 0
   targets = [
     "iterator"
-    "reducer"
-    "reactive"
+    "reactor"
+    "adapters"
+    "filters"
+    "reducers"
   ]
 
 (require "./#{target}") for target in targets
