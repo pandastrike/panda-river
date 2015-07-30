@@ -201,6 +201,20 @@ Like `join`, except that it takes a delimeter, separating each string with the d
       f = (r, s) -> if r == "" then r += s else r += d + s
       fold "", f, i
 
+## pump
+
+      # TODO: need to add synchronous version?
+
+      pump = curry (s, i) ->
+        asyncIterator async ->
+          {done, value} = yield i()
+          if !done
+            value: (s.write value)
+            done: false
+          else
+            s.end()
+            {done}
+
 ---
 
     module.exports = {collect, each, fold, reduce, foldr, reduceRight,
