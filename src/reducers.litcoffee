@@ -2,12 +2,19 @@
 
 Some functions _reduce_ an iterator into another value. Once a reduce function is introduced, the associated iterator functions will run.
 
-    {isIterable, isAsyncIterable, iterator, isIterator, isAsyncIterator,
-      isIteratorFunction, isAsyncIteratorFunction,
-      iteratorFunction} = require "./iterator"
+    {isIterable, iterator, isIterator,
+      isIteratorFunction, iteratorFunction} = require "./iterator"
 
-    {curry, binary, ternary, negate} = require "fairmont-core"
-    {isDefined, async, push, first, second, add} = require "fairmont-helpers"
+    {isReagent, reactor, isReactor,
+      isReactorFunction, reactorFunction} = require "./reactor"
+
+    {producer} = require "./adapters"
+
+    {curry, binary, ternary, noOp, negate} = require "fairmont-core"
+
+    {isFunction, isDefined, isArray, async,
+      first, push, second, add} = require "fairmont-helpers"
+
     {Method} = require "fairmont-multimethods"
 
 ## fold/reduce
@@ -16,24 +23,27 @@ Given an initial value, a function, and an iterator, reduce the iterator to a si
 
     fold = Method.create()
 
-    Method.define fold, (-> true), Function, isDefined,
-      (x, f, y) -> fold x, f, (iteratorFunction y)
+    Method.define fold, Function, (-> true), isDefined,
+      (f, x, y) -> fold x, f, (producer y)
 
-    Method.define fold, (-> true), Function, isIteratorFunction,
-      (x, f, i) ->
+    Method.define fold, Function, (-> true), isIteratorFunction,
+      (f, x, i) ->
         loop
           {done, value} = i()
           break if done
           x = f x, value
         x
 
-    Method.define fold, (-> true), Function, isAsyncIteratorFunction,
-      async (x, f, i) ->
+    Method.define fold, Function, (-> true), isReactorFunction,
+      async (f, x, i) ->
         loop
           {done, value} = yield i()
           break if done
           x = f x, value
         x
+
+    Method.define fold, Function, (-> true), isArray,
+      (f, x, ax) -> ax.reduce f, x
 
     reduce = fold = curry ternary fold
 
@@ -43,14 +53,17 @@ Given function and an initial value, reduce an iterator to a single value, ex: s
 
     foldr = Method.create()
 
-    Method.define foldr, (-> true), Function, isDefined,
-      (x, f, y) -> foldr x, f, (iteratorFunction y)
+    Method.define foldr, Function, (-> true), isDefined,
+      (f, x, y) -> foldr f, x, (producer y)
 
-    Method.define foldr, (-> true), Function, isIteratorFunction,
-      (x, f, i) -> (collect i).reduceRight(f, x)
+    Method.define foldr, Function, (-> true), isIteratorFunction,
+      (f, x, i) -> (collect i).reduceRight f, x
 
-    Method.define foldr, (-> true), Function, isAsyncIteratorFunction,
-      async (x, f, i) -> (yield collect i).reduceRight(f, x)
+    Method.define foldr, Function, (-> true), isReactorFunction,
+      (f, x, i) -> (collect i).then (ax) -> ax.reduceRight f, x
+
+    Method.define foldr, Function, (-> true), isArray,
+      (f, x, ax) -> ax.reduceRight f, x
 
     reduceRight = foldr = curry ternary foldr
 
@@ -58,7 +71,7 @@ Given function and an initial value, reduce an iterator to a single value, ex: s
 
 Collect an iterator's values into an array.
 
-    collect = (i) -> reduce [], push, i
+    collect = (i) -> reduce push, [], i
 
 ## each
 
@@ -66,7 +79,13 @@ Apply a function to each element but discard the results. This is a reducer beca
 
     each = curry (f, i) ->
       g = (_, x) -> (f x); _
-      reduce undefined, g, i
+      reduce g, undefined, i
+
+## start
+
+Works like `each` but doesn't apply a function to each element. This is useful with producers that encapsulate operations, like request processing in a server or handling browser events.
+
+    start = reduce noOp, undefined
 
 ## any
 
@@ -74,7 +93,8 @@ Given a function and an iterator, return true if the given function returns true
 
     any = Method.create()
 
-    Method.define any, Function, isDefined, (f, x) -> any f, (iteratorFunction x)
+    Method.define any, Function, isDefined, (f, x) ->
+      any f, (producer x)
 
     Method.define any, Function, isIteratorFunction,
       (f, i) ->
@@ -83,7 +103,7 @@ Given a function and an iterator, return true if the given function returns true
           break if (done || (f value))
         !done
 
-    Method.define any, Function, isAsyncIteratorFunction,
+    Method.define any, Function, isReactorFunction,
       async (f, i) ->
         loop
           ({done, value} = yield i())
@@ -98,12 +118,12 @@ Given a function and an iterator, return true if the function returns true for a
 
     all = Method.create()
 
-    Method.define all, Function, isDefined, (f, x) -> all f, (iteratorFunction x)
+    Method.define all, Function, isDefined, (f, x) -> all f, (producer x)
 
     Method.define all, Function, isIteratorFunction,
       (f, i) -> !any (negate f), i
 
-    Method.define all, Function, isAsyncIteratorFunction,
+    Method.define all, Function, isReactorFunction,
       async (f, i) -> !(yield any (negate f), i)
 
     all = curry binary all
@@ -115,7 +135,7 @@ Given a function and two iterators, return an iterator that produces values by a
     zip = Method.create()
 
     Method.define zip, Function, isDefined, isDefined,
-      (f, x, y) -> zip f, (iteratorFunction x), (iteratorFunction y)
+      (f, x, y) -> zip f, (producer x), (producer y)
 
     Method.define zip, Function, isIteratorFunction, isIteratorFunction,
       (f, i, j) ->
@@ -129,31 +149,17 @@ Given a function and two iterators, return an iterator that produces values by a
 
 ## unzip
 
-    unzip = (f, i) -> fold [[],[]], f, i
+    unzip = (f, i) -> fold f, [[],[]], i
 
 ## assoc
 
 Given an iterator that produces associative pairs, return an object whose keys are the first element of the pair and whose values are the second element of the pair.
 
-    assoc = Method.create()
+    _assoc = (object, [key, value]) ->
+      object[key] = value
+      object
 
-    Method.define assoc, isDefined, (x) -> assoc (iteratorFunction x)
-
-    Method.define assoc, isIteratorFunction, (i) ->
-      result = {}
-      loop
-        {done, value} = i()
-        break if done
-        result[(first value)] = (second value)
-      result
-
-    Method.define assoc, isAsyncIteratorFunction, (i) ->
-      result = {}
-      loop
-        {done, value} = yield i()
-        break if done
-        result[(first value)] = (second value)
-      result
+    assoc = reduce _assoc, {}
 
 ## flatten
 
@@ -164,26 +170,22 @@ Given an iterator that produces associative pairs, return an object whose keys a
         ax.push a
         ax
 
-    flatten = fold [], _flatten
+    flatten = fold _flatten, []
 
 ## sum
 
 Sum the numbers produced by a given iterator.
 
-This is here instead of in [Numeric Functions](./numeric.litcoffee) to avoid forward declaring `fold`.
-
-    sum = fold 0, add
+    sum = fold add, 0
 
 ## average
 
 Average the numbers producced by a given iterator.
 
-This is here instead of in [Numeric Functions](./numeric.litcoffee) to avoid forward declaring `fold`.
-
     average = (i) ->
       j = 0 # current count
       f = (r, n) -> r += ((n - r)/++j)
-      fold 0, f, i
+      fold f, 0, i
 
 ## join
 
@@ -191,7 +193,7 @@ Concatenate the strings produced by a given iterator. Unlike `Array::join`, this
 
 This is here instead of in [String Functions](./string.litcoffee) to avoid forward declaring `fold`.
 
-    join = fold "", add
+    join = fold add, ""
 
 ## delimit
 
@@ -199,10 +201,10 @@ Like `join`, except that it takes a delimeter, separating each string with the d
 
     delimit = curry (d, i) ->
       f = (r, s) -> if r == "" then r += s else r += d + s
-      fold "", f, i
+      fold f, "", i
 
 ---
 
-    module.exports = {collect, each, fold, reduce, foldr, reduceRight,
-      any, all, zip, unzip, assoc, flatten,
+    module.exports = {reduce, fold, reduce, foldr, reduceRight,
+      collect, each, start, any, all, zip, unzip, assoc, flatten,
       sum, average, join, delimit}

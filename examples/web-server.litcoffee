@@ -22,6 +22,8 @@ Let's pick up a few building blocks from Fairmont.
     {spread, spread} = require "fairmont"
     {start, flow, events, select, tee, map, iterator} = require "../src"
 
+We're ready now to implement our Web server.
+
     start flow [
       events "request", server
       select spread (request) -> request.method == "GET"
@@ -30,8 +32,8 @@ Let's pick up a few building blocks from Fairmont.
         response.statusCode = 200
         response.write "hello, world"
         response.end()
-        map spread logger
-      ]
+      map spread logger
+    ]
 
 We kick off the flow, as always, with `start flow`.
 We pick up request events from the server.
