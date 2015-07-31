@@ -55,7 +55,7 @@ A _value wrapper_ is what iterators produce, with `done` and `value` properties.
 These are part of the ES6 standard.
 
 An _iterator function_ is a function that returns a value wrapper.
-This is abstraction introduced by Fairmont/Reactive that allows us to leverage a functional programming when using iterators.
+This is an abstraction introduced by Fairmont/Reactive that allows us to leverage a functional programming style when using iterators.
 Since iterator functions are isomorphic to iterators, we'll call them iterators for convenience when it isn't ambiguous.
 
 ### Reactors
@@ -63,8 +63,9 @@ Since iterator functions are isomorphic to iterators, we'll call them iterators 
 An _asynchronous iterator_ is an iterator that produces promises that resolve to value wrappers.
 These are a proposed part of ES7.
 An _asynchronous iterator function_ is a function that returns promises that resolve to value wrappers.
-A _reactor_ Fairmont lingo for an asynchronous iterator.
-Simiarly, a _reactor function_ Fairmont-speak for an asynchronous iterator function.
+
+A _reactor_ is Fairmont lingo for an asynchronous iterator.
+Simiarly, a _reactor function_ is Fairmont-speak for an asynchronous iterator function.
 Since reactor functions are isomorphic to reactors, we'll call them reactors for convenience when it isn't ambiguous.
 
 When talking about values that could be iterators or reactors, we will sometimes say _producers_.
