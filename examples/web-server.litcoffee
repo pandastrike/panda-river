@@ -32,8 +32,8 @@ We're ready now to implement our Web server.
         response.statusCode = 200
         response.write "hello, world"
         response.end()
-        map spread logger
-      ]
+      map spread logger
+    ]
 
 We kick off the flow, as always, with `start flow`.
 We pick up request events from the server.
