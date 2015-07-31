@@ -1,10 +1,14 @@
 # Filters
 
-    {curry, binary} = require "fairmont-core"
-    {isFunction, isDefined} = require "fairmont-helpers"
+Filters transform an iterator or reactor into another iterator/reactor.
+
+    _when = require "when"
+    {curry, binary, negate} = require "fairmont-core"
+    {isFunction, isDefined, property, query, async} = require "fairmont-helpers"
     {Method} = require "fairmont-multimethods"
     {iterator, iteratorFunction, isIteratorFunction} = require "./iterator"
     {reactor, reactorFunction, isReactorFunction} = require "./reactor"
+    {producer} = require "./adapters"
 
 ## map
 
@@ -48,7 +52,7 @@ Given a function and an iterator, return an iterator that produces values from t
       (f, i) ->
         p = (({done, value}) -> done || (f value))
 
-        reactor -> W.iterate i, p, (->), i()
+        reactor -> _when.iterate i, p, (->), i()
 
     select = filter = curry binary select
 
@@ -185,106 +189,30 @@ Given a function and an iterator, produce a new iterator whose values are delimi
 
     lines = split (s) -> s.toString().split("\n")
 
-
-## flow
-
-      {curry} = require "fairmont-core"
-      {async} = require "fairmont-helpers"
-      {iterator, reactor} = require "./iterator"
-      {reduce} = require "./reducer"
-
-      flow = ([i, fx...]) -> reduce i, ((i,f) -> f i), fx
-
-## start
-
-      # TODO: need to add synchronous version
-
-      start = async (i) ->
-        loop
-          {done, value} = yield i()
-          break if done
-
-## split
-
-Given a function and an iterator, produce a new iterator whose values are delimited based on the given function.
-
-    split = Method.create()
-
-    Method.define split, Function, isDefined,
-      (f, x) -> split f, (producer x)
-
-    Method.define split, Function, isIteratorFunction, (f, i) ->
-      lines = []
-      remainder = ""
-      iterator ->
-        if lines.length > 0
-          value: lines.shift(), done: false
-        else
-          {value, done} = i()
-          if !done
-            [first, lines..., last] = f value
-            first = remainder + first
-            remainder = last
-            {value: first, done}
-          else if remainder != ""
-            value = remainder
-            remainder = ""
-            {value, done: false}
-          else
-            {done}
-
-    Method.define split, Function, isReactorFunction, (f, i) ->
-      lines = []
-      remainder = ""
-      reactor async ->
-        if lines.length > 0
-          value: lines.shift(), done: false
-        else
-          {value, done} = yield i()
-          if !done
-            [first, lines..., last] = f value
-            first = remainder + first
-            remainder = last
-            {value: first, done}
-          else if remainder != ""
-            value = remainder
-            remainder = ""
-            {value, done: false}
-          else
-            {done}
-
-    split = curry binary split
-
-## lines
-
-    lines = split (s) -> s.toString().split("\n")
-
 ## tee
 
-      # TODO: need to add synchronous version
+    # TODO: need to add synchronous version
 
-      tee = curry (f, i) ->
-        reactor ->
-          i().then ({done, value}) ->
-            (f value) unless done
-            {done, value}
-
+    tee = curry (f, i) ->
+      reactor ->
+        i().then ({done, value}) ->
+          (f value) unless done
+          {done, value}
 
 ## throttle
 
-      # TODO: need to add synchronous version
+    # TODO: need to add synchronous version
 
-      throttle = curry (ms, i) ->
-        last = 0
-        reactor async ->
-          loop
-            {done, value} = yield i()
-            break if done
-            now = Date.now()
-            break if now - last >= ms
-          last = now
-          {done, value}
-
+    throttle = curry (ms, i) ->
+      last = 0
+      reactor async ->
+        loop
+          {done, value} = yield i()
+          break if done
+          now = Date.now()
+          break if now - last >= ms
+        last = now
+        {done, value}
 
 ## pump
 
@@ -303,16 +231,18 @@ Write the values produced by the iterator to a stream.
         iterator ->
           {done, value} = i()
           if done then s.end() else s.write value
+          {done, value: s}
 
     Method.define pump, isStreamLike, isReactorFunction,
       reactor (s, i) ->
         p = i()
         p.then ({done, value}) ->
           if done then s.end() else s.write value
+          {done, value: s}
 
     pump = curry binary pump
 
 ---
 
-      module.exports = {map, select, filter, reject, project, compact,
-        partition, take, takeN, where, split, lines, tee, throttle, pump}
+    module.exports = {map, select, filter, reject, project, compact,
+      partition, take, takeN, where, split, lines, tee, throttle, pump}

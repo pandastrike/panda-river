@@ -1,14 +1,14 @@
 assert = require "assert"
 Amen = require "amen"
 
-Amen.describe "Reducer functions", (context) ->
+{identity} = require "fairmont-core"
+{first, add, odd, push, w} = require "fairmont-helpers"
 
-  {collect, each, fold, reduce, foldr, reduceRight,
-    any, all, zip, unzip, assoc, flatten,
-    sum, average, join, delimit} = require "../src/reducer"
+{reduce, fold, reduce, foldr, reduceRight,
+  collect, each, start, any, all, zip, unzip, assoc, flatten,
+  sum, average, join, delimit} = require "../src/reducers"
 
-  {identity} = require "fairmont-core"
-  {first, add, odd, push, w} = require "fairmont-helpers"
+Amen.describe "Reducers", (context) ->
 
   context.test "collect", ->
     assert (first collect [1..5]) == 1
@@ -17,11 +17,10 @@ Amen.describe "Reducer functions", (context) ->
     assert !(each ((x) -> x + 1), [1..5])?
 
   context.test "fold/reduce", ->
-    sum = fold 0, add
-    assert (sum [1..5]) == 15
+    assert (fold add, 0, [1..5]) == 15
 
   context.test "foldr/reduceRight", ->
-    assert (foldr "", add, "panama") == "amanap"
+    assert (foldr add, "", "panama") == "amanap"
 
   context.test "any", ->
     assert (any odd, [1..9])
@@ -45,7 +44,6 @@ Amen.describe "Reducer functions", (context) ->
       ax.push a
       bx.push b
       [ax, bx]
-
     assert (unzip unpair, zip pair, "panama", "canary")[0][0] == "p"
 
   context.test "assoc", ->

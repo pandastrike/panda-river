@@ -1,15 +1,18 @@
+_when = require "when"
+
 assert = require "assert"
 Amen = require "amen"
 
+{isReagent, reactor, isReactor,
+  isReactorFunction, reactorFunction} = require "../src/reactor"
+
 Amen.describe "Reactors", (context) ->
 
-  {isReagent, reactor, isReactor,
-    isReactorFunction, reactorFunction} = require "../src/reactor"
+  counter = (n = 0) -> reactor -> _when {done: false, value: n++}
 
-  W = require "when"
-
-  context.test "isReagent"
+  context.test "isReagent", ->
+    assert isReagent counter()
 
   context.test "reactorFunction", ->
     context.test "isReactorFunction", ->
-      assert isReactorFunction reactorFunction W [1..5]
+      assert isReactorFunction counter()

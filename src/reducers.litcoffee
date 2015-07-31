@@ -8,11 +8,13 @@ Some functions _reduce_ an iterator into another value. Once a reduce function i
     {isReagent, reactor, isReactor,
       isReactorFunction, reactorFunction} = require "./reactor"
 
-    {producer} = require "./adapter"
+    {producer} = require "./adapters"
 
-    {curry, binary, ternary, noOp} = require "fairmont-core"
-    {isFunction, isDefined, async,
+    {curry, binary, ternary, noOp, negate} = require "fairmont-core"
+
+    {isFunction, isDefined, isArray, async,
       first, push, second, add} = require "fairmont-helpers"
+
     {Method} = require "fairmont-multimethods"
 
 ## fold/reduce
@@ -41,7 +43,7 @@ Given an initial value, a function, and an iterator, reduce the iterator to a si
         x
 
     Method.define fold, Function, (-> true), isArray,
-      (f, x, ax) -> ax.reduce x, f
+      (f, x, ax) -> ax.reduce f, x
 
     reduce = fold = curry ternary fold
 
@@ -51,17 +53,17 @@ Given function and an initial value, reduce an iterator to a single value, ex: s
 
     foldr = Method.create()
 
-    Method.define foldr, (-> true), Function, (-> true), isDefined,
-      (f, x, y) -> foldr x, f, (producer y)
+    Method.define foldr, Function, (-> true), isDefined,
+      (f, x, y) -> foldr f, x, (producer y)
 
-    Method.define foldr, (-> true), Function, (-> true), isIteratorFunction,
-      (f, x, i) -> (collect i).reduceRight(f, x)
+    Method.define foldr, Function, (-> true), isIteratorFunction,
+      (f, x, i) -> (collect i).reduceRight f, x
 
-    Method.define foldr, (-> true), Function, (-> true), isReactorFunction,
-      async (f, x, i) -> (yield collect i).reduceRight(f, x)
+    Method.define foldr, Function, (-> true), isReactorFunction,
+      (f, x, i) -> (collect i).then (ax) -> ax.reduceRight f, x
 
-    Method.define foldr, (-> true), Function, (-> true), isArray,
-      (f, x, ax) -> ax.reduceRight x, f
+    Method.define foldr, Function, (-> true), isArray,
+      (f, x, ax) -> ax.reduceRight f, x
 
     reduceRight = foldr = curry ternary foldr
 
@@ -83,7 +85,7 @@ Apply a function to each element but discard the results. This is a reducer beca
 
 Works like `each` but doesn't apply a function to each element. This is useful with producers that encapsulate operations, like request processing in a server or handling browser events.
 
-      start = reduce noOp, undefined
+    start = reduce noOp, undefined
 
 ## any
 
@@ -147,7 +149,7 @@ Given a function and two iterators, return an iterator that produces values by a
 
 ## unzip
 
-    unzip = (f, i) -> fold [[],[]], f, i
+    unzip = (f, i) -> fold f, [[],[]], i
 
 ## assoc
 

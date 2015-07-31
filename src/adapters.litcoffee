@@ -1,11 +1,16 @@
 # Adapters
 
-    {curry, binary} = require "fairmont-core"
-    {isFunction, isDefined} = require "fairmont-helpers"
+Adapters create producers (iterators or reactors) from other values.
+
+    {promise, reject, resolve} = require "when"
+    {curry, compose, binary, identity} = require "fairmont-core"
+    {isFunction, isDefined, isPromise, property} = require "fairmont-helpers"
     {Method} = require "fairmont-multimethods"
     {producer} = require "./adapters"
-    {iterator, iteratorFunction, isIteratorFunction} = require "./iterator"
-    {reactor, reactorFunction, isReactorFunction} = require "./reactor"
+    {isIterable, isIterator, isIteratorFunction,
+      iterator, iteratorFunction} = require "./iterator"
+    {isReagent, isReactor, isReactorFunction,
+      reactor, reactorFunction} = require "./reactor"
 
 ## producer
 
@@ -34,7 +39,7 @@ Transform a synchronous iterator into an asynchronous iterator by extracting a P
         {done, value} = i()
         if done then (W {done}) else value.then (value) -> {done, value}
 
-    Method.define pull, isAsyncIteratorFunction, (i) ->
+    Method.define pull, isReactorFunction, (i) ->
       reactor ->
         i().then ({done, value}) ->
           if done then (W {done}) else value.then (value) -> {done, value}
@@ -53,43 +58,39 @@ Analogous to `wrap`for an iterator. Always produces the same value `x`.
     Method.define events, String, isSource, (name, source) ->
       events {name, end: "end", error: "error"}, source
 
-    Method.define events, Object, isSource, ->
+    Method.define events, Object, isSource, (map, source) ->
+      {name, end, error} = map
+      end ?= "end"
+      error ?= "error"
+      done = false
+      pending = []
+      resolved = []
 
-      {promise, reject, resolve} = require "when"
+      enqueue = (x) ->
+        if pending.length == 0
+          resolved.push x
+        else
+          p = pending.shift()
+          x.then(p.resolve).catch(p.reject)
 
-      (map, source) ->
-        {name, end, error} = map
-        end ?= "end"
-        error ?= "error"
-        done = false
-        pending = []
-        resolved = []
-
-        enqueue = (x) ->
-          if pending.length == 0
-            resolved.push x
+      dequeue = ->
+        if resolved.length == 0
+          if !done
+            promise (resolve, reject) -> pending.push {resolve, reject}
           else
-            p = pending.shift()
-            x.then(p.resolve).catch(p.reject)
+            resolve {done}
+        else
+          resolved.shift()
 
-        dequeue = ->
-          if resolved.length == 0
-            if !done
-              promise (resolve, reject) -> pending.push {resolve, reject}
-            else
-              resolve {done}
-          else
-            resolved.shift()
+      source.on name, (ax...) ->
+        value = if ax.length < 2 then ax[0] else ax
+        enqueue resolve {done, value}
+      source.on end, (error) ->
+        done = true
+        enqueue resolve {done}
+      source.on error, (error) -> enqueue reject error
 
-        source.on name, (ax...) ->
-          value = if ax.length < 2 then ax[0] else ax
-          enqueue resolve {done, value}
-        source.on end, (error) ->
-          done = true
-          enqueue resolve {done}
-        source.on error, (error) -> enqueue reject error
-
-        asyncIterator dequeue
+      reactor dequeue
 
     events = curry binary events
 
@@ -101,51 +102,10 @@ Turns a stream into an iterator function.
 
 ## flow
 
-      {curry} = require "fairmont-core"
-      {async} = require "fairmont-helpers"
-      {iterator, asyncIterator} = require "./iterator"
-      {reduce} = require "./reducer"
+We don't use `reduce` here to avoid a circular dependency.
 
-      flow = ([i, fx...]) -> reduce i, ((i,f) -> f i), fx
-
-## pump
-
-      # TODO: need to add synchronous version
-
-      pump = curry (s, i) ->
-        asyncIterator async ->
-          {done, value} = yield i()
-          if !done
-            value: (s.write value)
-            done: false
-          else
-            s.end()
-            {done}
-
-## tee
-
-      # TODO: need to add synchronous version
-
-      tee = curry (f, i) ->
-        asyncIterator async ->
-          {done, value} = yield i()
-          (f value) unless done
-          {done, value}
-
-
-## throttle
-
-      throttle = curry (ms, i) ->
-        last = 0
-        asyncIterator async ->
-          loop
-            {done, value} = yield i()
-            break if done
-            now = Date.now()
-            break if now - last >= ms
-          last = now
-          {done, value}
+    flow = ([i, fx...]) -> fx.reduce ((i,f) -> f i), i
 
 ---
 
-      module.exports = {flow, start, pump, tee, throttle}
+    module.exports = {producer, pull, repeat, events, stream, flow}
