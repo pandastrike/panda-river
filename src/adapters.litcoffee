@@ -2,7 +2,8 @@
 
 Adapters create producers (iterators or reactors) from other values.
 
-    {promise, reject, resolve} = require "when"
+    _when = require "when"
+    {promise, reject, resolve} = _when
     {curry, compose, binary, identity} = require "fairmont-core"
     {isFunction, isDefined, isPromise, property} = require "fairmont-helpers"
     {Method} = require "fairmont-multimethods"
@@ -24,7 +25,9 @@ The most basic adapter simply takes a non-producer value and attempts to make it
     Method.define producer, isReactor, (r) -> reactorFunction r
     Method.define producer, isIteratorFunction, identity
     Method.define producer, isReactorFunction, identity
-    Method.define producer, isPromise, (p) -> reactorFunction p
+    Method.define producer, isPromise, (p) ->
+      _p = p.then (x) -> iteratorFunction x
+      reactor -> _p.then (i) -> i()
 
 ## pull
 
@@ -37,12 +40,12 @@ Transform a synchronous iterator into an asynchronous iterator by extracting a P
     Method.define pull, isIteratorFunction, (i) ->
       reactor ->
         {done, value} = i()
-        if done then (W {done}) else value.then (value) -> {done, value}
+        if done then (_when {done}) else value.then (value) -> {done, value}
 
     Method.define pull, isReactorFunction, (i) ->
       reactor ->
         i().then ({done, value}) ->
-          if done then (W {done}) else value.then (value) -> {done, value}
+          if done then (_when {done}) else value.then (value) -> {done, value}
 
 ## repeat
 
@@ -104,7 +107,7 @@ Turns a stream into an iterator function.
 
 We don't use `reduce` here to avoid a circular dependency.
 
-    flow = ([i, fx...]) -> fx.reduce ((i,f) -> f i), i
+    flow = ([x, fx...]) -> fx.reduce ((i,f) -> f i), (producer x)
 
 ---
 

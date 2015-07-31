@@ -58,13 +58,6 @@ This is the async variant of `isIteratorFunction`.
 
     Method.define reactorFunction, isReactorFunction, identity
 
-We also want to be able to convert a promise that resolves into an iterable into an iterator function.
-
-    # TODO: this should be defined on reactor
-    Method.define reactorFunction, isPromise, (p) ->
-      _p = p.then (x) -> reactorFunction x
-      reactor -> _p.then (i) -> i()
-
 ---
 
     module.exports = {isReagent, isAsyncIterable,

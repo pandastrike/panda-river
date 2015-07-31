@@ -234,11 +234,12 @@ Write the values produced by the iterator to a stream.
           {done, value: s}
 
     Method.define pump, isStreamLike, isReactorFunction,
-      reactor (s, i) ->
-        p = i()
-        p.then ({done, value}) ->
-          if done then s.end() else s.write value
-          {done, value: s}
+      (s, i) ->
+        reactor ->
+          p = i()
+          p.then ({done, value}) ->
+            if done then s.end() else s.write value
+            {done, value: s}
 
     pump = curry binary pump
 
