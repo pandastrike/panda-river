@@ -39,3 +39,14 @@ The `map` function returns an iterator, but here we're simplying currying it—n
 The `stream` function takes a stream and returns an iterator that produces values from the stream. Then we write these back to the connection with `pump`. The `pump` function, given a stream and an iterator, writes the values produced by the iterator to the stream. The `pump` function is curried here, so that it can take the iterator produced by `stream`.
 
 In this simple example, that's the end of the flow. There's not much to it. We get a connections and stream them back into themselves. However, we could have replaced the echo flow with something that processes the input and does something more interesting.
+
+To run this example:
+1) Execute the following command in project root:
+
+> coffee --nodejs --harmony examples/echo-server.litcoffee
+
+2) In a another terminal, enter:
+
+> nc localhost 1337
+
+Enter some text and it will "echo" back in the terminal.

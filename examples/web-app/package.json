@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "coffee-script": "^1.9.3",
     "fairmont-reactive": "^1.0.0-beta-19",
     "jquery": "^2.1.4"
   },

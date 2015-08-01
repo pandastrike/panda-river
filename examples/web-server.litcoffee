@@ -50,3 +50,9 @@ This allows us to do something with the request, but also pass it along to the n
 Finally, we log the result.
 
 As you can see, this works a lot of like middleware in a package like Express. FRP style effectively allows us to replicate middleware with no extra code.
+
+To run this example:
+1) From the examples/web-app directory, do the following:
+- npm install
+- npm run build
+- npm run build serve

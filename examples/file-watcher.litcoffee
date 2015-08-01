@@ -49,3 +49,11 @@ We'll log that we got an event and then run `npm test`.
 Since the `shell` function returns a Promise, we have `pull` out the Promise into a value.
 Otherwise, we would have gotten a Promise as the argument to our last `map` function.
 Finally, we log the output of the shell command via the console.
+
+To run this example:
+1) Execute the following command from project root:
+
+> coffee --nodejs --harmony examples/file-watcher.litcoffee
+
+2) In another terminal window, touch one of the src files...it will trigger the tests
+> touch touch src/index.coffee
