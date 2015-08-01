@@ -52,7 +52,12 @@ Finally, we log the result.
 As you can see, this works a lot of like middleware in a package like Express. FRP style effectively allows us to replicate middleware with no extra code.
 
 To run this example:
-1) From the examples/web-app directory, do the following:
-- npm install
-- npm run build
-- npm run build serve
+1) Execute the following command in project root:
+
+> coffee --nodejs --harmony examples/web-server.litcoffee
+
+2) In a another terminal, enter:
+
+> curl localhost:1337
+
+The result from the above curl will be: "Hello World"
