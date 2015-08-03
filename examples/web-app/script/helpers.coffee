@@ -21,7 +21,7 @@ writeFile = (directory, extension) ->
     if isPromise x
       x = yield x
     [filename, content] = x
-    yield write join directory, "#{filename}.#{extension}"
+    yield write (join directory, "#{filename}#{extension}"), content
 
 watchFile = curry (f, path) ->
 

@@ -1,6 +1,6 @@
 {
   "name": "fairmont-reactive",
-  "version": "1.0.0-beta-22",
+  "version": "1.0.0-beta-23",
   "description": "Functional reactive programming in JavaScript and CoffeeScript.",
   "files": [
     "src/",
@@ -9,9 +9,9 @@
   ],
   "main": "lib/index.js",
   "scripts": {
-    "prepublish": "coffee --nodejs --harmony -o lib/ -c src/*.*coffee",
-    "test": "coffee --nodejs --harmony test/index.coffee",
-    "watch": "coffee --nodejs --harmony -o lib/ -cw src/*.*coffee",
+    "prepublish": "coffee --nodejs '--harmony --harmony_proxies' -o lib/ -c src/*.*coffee",
+    "test": "coffee --nodejs '--harmony --harmony_proxies' test/index.coffee",
+    "watch": "coffee --nodejs '--harmony --harmony_proxies' -o lib/ -cw src/*.*coffee",
     "version": "(node_modules/.bin/json -f package.json version > VERSION)",
     "tag": "(cat VERSION | xargs -I version git tag -am version version) && git push --tags"
   },
@@ -27,6 +27,7 @@
   "devDependencies": {
     "amen": "^1.0.0-alpha-03",
     "fairmont": "^1.0.0-beta-19",
+    "harmony-reflect": "^1.4.0",
     "json": "^9.0.3"
   },
   "dependencies": {
