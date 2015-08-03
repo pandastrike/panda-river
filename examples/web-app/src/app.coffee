@@ -4,11 +4,16 @@ $ = require "jquery"
 
 $ ->
 
-  data = {}
+  data = counter: 0
 
   start flow [
     events "click", $("a")
     map -> data.counter++
   ]
 
-  console.log evented
+  start flow [
+    events "change", evented data
+    map ->
+      $("p#counter")
+      .html data.counter
+  ]
