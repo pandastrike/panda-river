@@ -7,13 +7,13 @@ $ ->
   data = counter: 0
 
   start flow [
-    events "click", $("a")
+    events "click", $("a[href='#increment']")
     map -> data.counter++
   ]
 
   start flow [
     events "change", evented data
     map ->
-      $("p#counter")
+      $("p.counter")
       .html data.counter
   ]

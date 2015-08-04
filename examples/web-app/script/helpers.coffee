@@ -4,13 +4,27 @@
   throttle} = require "fairmont"
 jade = require "jade"
 coffee = require "coffee-script"
+stylus = require "stylus"
 fs = require "fs"
+{promise} = require "when"
 
 glob = partial glob, _, "./"
 
 compileJade = (path) ->
   filename = basename path, ".jade"
   [filename, (do jade.compileFile path)]
+
+compileStylus = (plugins...) ->
+  async (path) ->
+    filename = basename path, ".styl"
+    source = yield read path
+    css = yield promise (resolve, reject) ->
+      stylus.render source,
+        filename: path
+        use: plugins
+        (error, css) ->
+          unless error? then resolve css else reject error
+    [filename, css]
 
 compileCoffeeScript = async (path) ->
   filename = basename path, ".coffee"
@@ -35,5 +49,5 @@ watchFile = curry (f, path) ->
       f()
     ]
 
-module.exports = {glob, compileJade, compileCoffeeScript,
+module.exports = {glob, compileJade, compileStylus, compileCoffeeScript,
   writeFile, watchFile}

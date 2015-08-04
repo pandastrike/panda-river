@@ -1,23 +1,33 @@
 {createWriteStream} = require "fs"
 {join} = require "path"
 {mkdirp, start, flow, map, async} = require "fairmont"
-{glob, compileJade, compileCoffeeScript,
+{glob, compileJade, compileStylus, compileCoffeeScript,
   writeFile, watchFile} = require "./helpers"
 browserify = require "browserify"
 express = require "express"
 morgan = require "morgan"
+verse = require "verse"
 
 {task} = require "./task"
 
-task "default", "templates", "bundle"
+task "default", "templates", "css", "bundle"
 
-task "directories", async -> yield mkdirp "0777", "build"
+task "directories", async ->
+  yield mkdirp "0777", "lib"
+  yield mkdirp "0777", "build"
 
 task "templates", "directories", async ->
   yield start flow [
     yield glob "src/*.jade"
     map compileJade
     map writeFile "build", ".html"
+  ]
+
+task "css", "directories", async ->
+  yield start flow [
+    yield glob "src/*.styl"
+    map compileStylus verse()
+    map writeFile "build", ".css"
   ]
 
 task "code", "directories", async ->
@@ -41,13 +51,19 @@ task "watch-templates", async ->
     map watchFile -> task "templates"
   ]
 
+task "watch-css", async ->
+  yield start flow [
+    yield glob "src/*.styl"
+    map watchFile -> task "css"
+  ]
+
 task "watch-code", async ->
   yield start flow [
     yield glob "src/*.coffee"
     map watchFile -> task "bundle"
   ]
 
-task "watch", "watch-code", "watch-templates"
+task "watch", "watch-code", "watch-css", "watch-templates"
 
 task "serve", ->
   app = express()
