@@ -6,27 +6,28 @@ Filters transform an iterator or reactor into another iterator/reactor.
     {curry, binary, negate} = require "fairmont-core"
     {isFunction, isDefined, property, query, async} = require "fairmont-helpers"
     {Method} = require "fairmont-multimethods"
-    {iterator, iteratorFunction, isIteratorFunction} = require "./iterator"
-    {reactor, reactorFunction, isReactorFunction} = require "./reactor"
+    {iterator, iteratorFunction, isIterator, next} = require "./iterator"
+    {reactor, reactorFunction, isReactor} = require "./reactor"
     {producer} = require "./adapters"
 
 ## map
 
 Return a new iterator that will apply the given function to each value produced by the iterator.
 
+
     map = Method.create()
 
     Method.define map, Function, isDefined,
       (f, x) -> map f, (producer x)
 
-    Method.define map, Function, isIteratorFunction, (f, i) ->
+    Method.define map, Function, isIterator, (f, i) ->
       iterator ->
-        {done, value} = i()
+        {done, value} = next i
         if done then {done} else {done, value: (f value)}
 
-    Method.define map, Function, isReactorFunction, (f, i) ->
+    Method.define map, Function, isReactor, (f, i) ->
       reactor ->
-        i().then ({done, value}) ->
+        (next i).then ({done, value}) ->
           if done then {done} else {done, value: (f value)}
 
     map = curry binary map
@@ -40,19 +41,19 @@ Given a function and an iterator, return an iterator that produces values from t
     Method.define select, Function, isDefined,
       (f, x) -> select f, (producer x)
 
-    Method.define select, Function, isIteratorFunction,
+    Method.define select, Function, isIterator,
       (f, i) ->
         iterator ->
           loop
-            {done, value} = i()
+            {done, value} = next i
             break if done || (f value)
           {done, value}
 
-    Method.define select, Function, isReactorFunction,
+    Method.define select, Function, isReactor,
       (f, i) ->
         p = (({done, value}) -> done || (f value))
-
-        reactor -> _when.iterate i, p, (->), i()
+        j = -> next i
+        reactor -> _when.iterate j, p, (->), j()
 
     select = filter = curry binary select
 
@@ -77,21 +78,21 @@ Given a function and an iterator, return an iterator that produces values from t
     Method.define partition, Number, isDefined, (n, x) ->
       partition n, (producer x)
 
-    Method.define partition, Number, isIteratorFunction, (n, i) ->
+    Method.define partition, Number, isIterator, (n, i) ->
       iterator ->
         batch = []
         loop
-          {done, value} = i()
+          {done, value} = next i
           break if done
           batch.push value
           break if batch.length == n
         if done then {done} else {value: batch, done}
 
-    Method.define partition, Number, isReactorFunction, (n, i) ->
+    Method.define partition, Number, isReactor, (n, i) ->
       reactor async ->
         batch = []
         loop
-          {done, value} = yield i()
+          {done, value} = yield next i
           break if done
           batch.push value
           break if batch.length == n
@@ -108,11 +109,11 @@ Given a function and an iterator, return an iterator that produces values from t
     Method.define take, Function, isDefined,
       (f, x) -> take f, (producer x)
 
-    Method.define take, Function, isIteratorFunction,
+    Method.define take, Function, isIterator,
       (f, i) ->
         iterator ->
           if !done
-            {done, value} = i()
+            {done, value} = next i
             if !done && (f value)
               {value, done: false}
             else
@@ -143,14 +144,14 @@ Given a function and an iterator, produce a new iterator whose values are delimi
     Method.define split, Function, isDefined,
       (f, x) -> split f, (producer x)
 
-    Method.define split, Function, isIteratorFunction, (f, i) ->
+    Method.define split, Function, isIterator, (f, i) ->
       lines = []
       remainder = ""
       iterator ->
         if lines.length > 0
           value: lines.shift(), done: false
         else
-          {value, done} = i()
+          {value, done} = next i
           if !done
             [first, lines..., last] = f value
             first = remainder + first
@@ -163,14 +164,14 @@ Given a function and an iterator, produce a new iterator whose values are delimi
           else
             {done}
 
-    Method.define split, Function, isReactorFunction, (f, i) ->
+    Method.define split, Function, isReactor, (f, i) ->
       lines = []
       remainder = ""
       reactor async ->
         if lines.length > 0
           value: lines.shift(), done: false
         else
-          {value, done} = yield i()
+          {value, done} = yield next i
           if !done
             [first, lines..., last] = f value
             first = remainder + first
@@ -195,7 +196,7 @@ Given a function and an iterator, produce a new iterator whose values are delimi
 
     tee = curry (f, i) ->
       reactor ->
-        i().then ({done, value}) ->
+        (next i).then ({done, value}) ->
           (f value) unless done
           {done, value}
 
@@ -207,7 +208,7 @@ Given a function and an iterator, produce a new iterator whose values are delimi
       last = 0
       reactor async ->
         loop
-          {done, value} = yield i()
+          {done, value} = yield next i
           break if done
           now = Date.now()
           break if now - last >= ms
@@ -226,18 +227,17 @@ Write the values produced by the iterator to a stream.
     Method.define pump, isStreamLike, isDefined,
       (s, x) -> pump s, (producer x)
 
-    Method.define pump, isStreamLike, isIteratorFunction,
+    Method.define pump, isStreamLike, isIterator,
       (s, i) ->
         iterator ->
-          {done, value} = i()
+          {done, value} = next i
           if done then s.end() else s.write value
           {done, value: s}
 
-    Method.define pump, isStreamLike, isReactorFunction,
+    Method.define pump, isStreamLike, isReactor,
       (s, i) ->
         reactor ->
-          p = i()
-          p.then ({done, value}) ->
+          (next i).then ({done, value}) ->
             if done then s.end() else s.write value
             {done, value: s}
 

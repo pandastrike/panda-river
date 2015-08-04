@@ -8,10 +8,8 @@ Adapters create producers (iterators or reactors) from other values.
     {isFunction, isDefined, isPromise, property} = require "fairmont-helpers"
     {Method} = require "fairmont-multimethods"
     {producer} = require "./adapters"
-    {isIterable, isIterator, isIteratorFunction,
-      iterator, iteratorFunction} = require "./iterator"
-    {isReagent, isReactor, isReactorFunction,
-      reactor, reactorFunction} = require "./reactor"
+    {isIterable, isIterator, isIterator, iterator, next} = require "./iterator"
+    {isReagent, isReactor, isReactor, reactor} = require "./reactor"
 
 ## producer
 
@@ -19,15 +17,13 @@ The most basic adapter simply takes a non-producer value and attempts to make it
 
     producer = Method.create()
 
-    Method.define producer, isIterable, (x) -> iteratorFunction x
-    Method.define producer, isReagent, (x) -> reactorFunction x
-    Method.define producer, isIterator, (i) -> iteratorFunction i
-    Method.define producer, isReactor, (r) -> reactorFunction r
-    Method.define producer, isIteratorFunction, identity
-    Method.define producer, isReactorFunction, identity
+    Method.define producer, isIterable, (x) -> iterator x
+    Method.define producer, isReagent, (x) -> reactor x
+    Method.define producer, isIterator, identity
+    Method.define producer, isReactor, identity
     Method.define producer, isPromise, (p) ->
-      _p = p.then (x) -> iteratorFunction x
-      reactor -> _p.then (i) -> i()
+      _p = p.then (x) -> iterator x
+      reactor -> _p.then (i) -> next i
 
 ## pull
 
@@ -37,12 +33,12 @@ Transform a synchronous iterator into an asynchronous iterator by extracting a P
 
     Method.define pull, isDefined, (x) -> pull producer x
 
-    Method.define pull, isIteratorFunction, (i) ->
+    Method.define pull, isIterator, (i) ->
       reactor ->
-        {done, value} = i()
+        {done, value} = next i
         if done then (_when {done}) else value.then (value) -> {done, value}
 
-    Method.define pull, isReactorFunction, (i) ->
+    Method.define pull, isReactor, (i) ->
       reactor ->
         i().then ({done, value}) ->
           if done then (_when {done}) else value.then (value) -> {done, value}
@@ -99,7 +95,7 @@ Analogous to `wrap`for an iterator. Always produces the same value `x`.
 
 ## stream
 
-Turns a stream into an iterator function.
+Turns a stream into reactor.
 
     stream = events "data"
 

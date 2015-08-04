@@ -2,11 +2,9 @@
 
 Some functions _reduce_ an iterator into another value. Once a reduce function is introduced, the associated iterator functions will run.
 
-    {isIterable, iterator, isIterator,
-      isIteratorFunction, iteratorFunction} = require "./iterator"
+    {isIterable, iterator, isIterator, isIterator, next} = require "./iterator"
 
-    {isReagent, reactor, isReactor,
-      isReactorFunction, reactorFunction} = require "./reactor"
+    {isReagent, reactor, isReactor, isReactor} = require "./reactor"
 
     {producer} = require "./adapters"
 
@@ -17,6 +15,9 @@ Some functions _reduce_ an iterator into another value. Once a reduce function i
 
     {Method} = require "fairmont-multimethods"
 
+    next = (i) -> i.next()
+
+
 ## fold/reduce
 
 Given an initial value, a function, and an iterator, reduce the iterator to a single value, ex: sum a list of integers.
@@ -26,18 +27,18 @@ Given an initial value, a function, and an iterator, reduce the iterator to a si
     Method.define fold, Function, (-> true), isDefined,
       (f, x, y) -> fold x, f, (producer y)
 
-    Method.define fold, Function, (-> true), isIteratorFunction,
+    Method.define fold, Function, (-> true), isIterator,
       (f, x, i) ->
         loop
-          {done, value} = i()
+          {done, value} = next i
           break if done
           x = f x, value
         x
 
-    Method.define fold, Function, (-> true), isReactorFunction,
+    Method.define fold, Function, (-> true), isReactor,
       async (f, x, i) ->
         loop
-          {done, value} = yield i()
+          {done, value} = yield next i
           break if done
           x = f x, value
         x
@@ -56,10 +57,10 @@ Given function and an initial value, reduce an iterator to a single value, ex: s
     Method.define foldr, Function, (-> true), isDefined,
       (f, x, y) -> foldr f, x, (producer y)
 
-    Method.define foldr, Function, (-> true), isIteratorFunction,
+    Method.define foldr, Function, (-> true), isIterator,
       (f, x, i) -> (collect i).reduceRight f, x
 
-    Method.define foldr, Function, (-> true), isReactorFunction,
+    Method.define foldr, Function, (-> true), isReactor,
       (f, x, i) -> (collect i).then (ax) -> ax.reduceRight f, x
 
     Method.define foldr, Function, (-> true), isArray,
@@ -75,7 +76,7 @@ Collect an iterator's values into an array.
 
 ## each
 
-Apply a function to each element but discard the results. This is a reducer because there isn't any point in having an iterator function that simply discards the value from another iterator. Basically, use `each` when you want to reduce an iterator without taking up any additional memory.
+Apply a function to each element but discard the results. This is a reducer because there isn't any point in having an iterator that simply discards the value from another iterator. Basically, use `each` when you want to reduce an iterator without taking up any additional memory.
 
     each = curry (f, i) ->
       g = (_, x) -> (f x); _
@@ -96,17 +97,17 @@ Given a function and an iterator, return true if the given function returns true
     Method.define any, Function, isDefined, (f, x) ->
       any f, (producer x)
 
-    Method.define any, Function, isIteratorFunction,
+    Method.define any, Function, isIterator,
       (f, i) ->
         loop
-          ({done, value} = i())
+          ({done, value} = next i)
           break if (done || (f value))
         !done
 
-    Method.define any, Function, isReactorFunction,
+    Method.define any, Function, isReactor,
       async (f, i) ->
         loop
-          ({done, value} = yield i())
+          ({done, value} = yield next i)
           break if (done || (f value))
         !done
 
@@ -120,10 +121,10 @@ Given a function and an iterator, return true if the function returns true for a
 
     Method.define all, Function, isDefined, (f, x) -> all f, (producer x)
 
-    Method.define all, Function, isIteratorFunction,
+    Method.define all, Function, isIterator,
       (f, i) -> !any (negate f), i
 
-    Method.define all, Function, isReactorFunction,
+    Method.define all, Function, isReactor,
       async (f, i) -> !(yield any (negate f), i)
 
     all = curry binary all
@@ -137,11 +138,11 @@ Given a function and two iterators, return an iterator that produces values by a
     Method.define zip, Function, isDefined, isDefined,
       (f, x, y) -> zip f, (producer x), (producer y)
 
-    Method.define zip, Function, isIteratorFunction, isIteratorFunction,
+    Method.define zip, Function, isIterator, isIterator,
       (f, i, j) ->
         iterator ->
-          x = i()
-          y = j()
+          x = next i
+          y = next j
           if !x.done && !y.done
             value: (f x.value, y.value), done: false
           else

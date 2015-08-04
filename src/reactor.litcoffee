@@ -1,5 +1,7 @@
 # Reactors
 
+Reactors are async iterators. That is, they are iterators that return promises that resolve to value-wrappers.
+
     W = require "when"
 
     {identity, curry, compose, binary,
@@ -37,30 +39,7 @@ For the moment, generator functions in Node aren't iterables for some reason. So
 
     Method.define reactor, isGenerator, (g) -> g()
 
-## isReactorFunction, isAsyncIteratorFunction
-
-This is the async variant of `isIteratorFunction`.
-
-    isReactorFunction = isAsyncIteratorFunction = (f) ->
-      (isFunction f) && (isAsyncIterator f)
-
-## reactorFunction, asyncIteratorFunction
-
-    reactorFunction = asyncIteratorFunction = Method.create()
-
-    Method.define reactorFunction, isReagent,
-      (x) -> reactorFunction reactor x
-
-    Method.define reactorFunction, isReactor,
-      (r) -> reactor (-> i.next())
-
-    Method.define reactorFunction, isFunction, (f) -> reactor f
-
-    Method.define reactorFunction, isReactorFunction, identity
-
 ---
 
     module.exports = {isReagent, isAsyncIterable,
-      reactor, asyncIterator, isReactor, isAsyncIterator,
-      reactorFunction, asyncIteratorFunction,
-      isReactorFunction, isAsyncIteratorFunction}
+      reactor, asyncIterator, isReactor, isAsyncIterator}

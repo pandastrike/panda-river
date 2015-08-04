@@ -3,8 +3,7 @@ _when = require "when"
 assert = require "assert"
 Amen = require "amen"
 
-{isReagent, reactor, isReactor,
-  isReactorFunction, reactorFunction} = require "../src/reactor"
+{isReagent, reactor, isReactor} = require "../src/reactor"
 
 Amen.describe "Reactors", (context) ->
 
@@ -13,6 +12,6 @@ Amen.describe "Reactors", (context) ->
   context.test "isReagent", ->
     assert isReagent counter()
 
-  context.test "reactorFunction", ->
-    context.test "isReactorFunction", ->
-      assert isReactorFunction counter()
+  context.test "reactor", ->
+    context.test "isReactor", ->
+      assert isReactor counter()
