@@ -18,7 +18,7 @@
     "verse": "^1.0.0-alpha-02"
   },
   "scripts": {
-    "build": "coffee --nodejs --harmony script/build.coffee",
+    "task": "coffee --nodejs --harmony script/runner.coffee",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
