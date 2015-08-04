@@ -1,6 +1,6 @@
 # Fairmont/Reactive
 
-Fairmont/Reactive is a JavaScript library for functional reactive programming.
+[Fairmont](https://github.com/pandastrike/fairmont)/Reactive is a JavaScript library for functional reactive programming.
 
 ### In JavaScript
 
