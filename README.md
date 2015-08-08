@@ -4,6 +4,8 @@
 
 [0]:https://github.com/pandastrike/fairmont
 
+Here's a simple 'hello, world' Web server written in a functional, reactive style using Fairmont.
+
 ### In JavaScript
 
 ```javascript
