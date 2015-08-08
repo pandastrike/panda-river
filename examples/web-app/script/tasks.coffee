@@ -10,7 +10,7 @@ verse = require "verse"
 
 {task} = require "./task"
 
-task "default", "templates", "css", "bundle"
+task "build", "templates", "css", "bundle"
 
 task "directories", async ->
   yield mkdirp "0777", "lib"

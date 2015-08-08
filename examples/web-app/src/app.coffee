@@ -1,4 +1,4 @@
-{start, flow, events, map, evented} = require "fairmont-reactive"
+{start, flow, events, map, observe} = require "fairmont-reactive"
 
 $ = require "jquery"
 
@@ -12,7 +12,7 @@ $ ->
   ]
 
   start flow [
-    events "change", evented data
+    events "change", observe data
     map ->
       $("p.counter")
       .html data.counter

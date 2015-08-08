@@ -9,7 +9,7 @@ npm install
 - Run the build task.
 
 ```
-npm run task default
+npm run task build
 ```
 
 - Run the Web server.
