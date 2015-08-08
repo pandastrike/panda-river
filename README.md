@@ -1,6 +1,8 @@
 # Fairmont/Reactive
 
-[Fairmont](https://github.com/pandastrike/fairmont)/Reactive is a JavaScript library for functional reactive programming.
+[Fairmont][0]/Reactive is a JavaScript library for functional reactive programming.
+
+[0]:https://github.com/pandastrike/fairmont
 
 ### In JavaScript
 
@@ -44,7 +46,7 @@ start flow [
 
 ## Examples
 
-You can get a feel for what Fairmont can do for you by [checking out the examples](./examples).
+You can get a feel for what [Fairmont][0] can do for you by [checking out the examples](./examples).
 
 ## Introduction
 
@@ -60,7 +62,7 @@ An _asynchronous iterator_ is an iterator that produces promises that resolve to
 These are a proposed part of ES7.
 An _asynchronous iterator function_ is a function that returns promises that resolve to value wrappers.
 
-A _reactor_ is Fairmont lingo for an asynchronous iterator.
+A _reactor_ is [Fairmont][0] lingo for an asynchronous iterator.
 
 When talking about values that could be iterators or reactors, we will sometimes say _producers_.
 
@@ -88,7 +90,7 @@ Similarly, if you pass a promise into `map`, the promise will be coerced into a 
 
 ## About Fairmont
 
-Fairmont takes full advantage of ES6+ features like iterators (including async iterators, called _reactors_), generators, and promises. Inspired by libraries like [Underscore](http://underscorejs.org/) and many others, Fairmont features include:
+[Fairmont][0] takes full advantage of ES6+ features like iterators (including async iterators, called _reactors_), generators, and promises. Inspired by libraries like [Underscore](http://underscorejs.org/) and many others, [Fairmont][0] features include:
 
 * reactive programming support through async iterators
 * lazy evaluation on collection operations via iterators
@@ -101,7 +103,7 @@ Fairmont takes full advantage of ES6+ features like iterators (including async i
 
 ## Status
 
-Fairmont is still under heavy development and is `beta` quality, meaning you should probably not use it in your production code.
+[Fairmont][0] is still under heavy development and is `beta` quality, meaning you should probably not use it in your production code.
 
 ## Roadmap
 
