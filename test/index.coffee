@@ -7,7 +7,7 @@ if targets.length == 0
     "adapters"
     "filters"
     "reducers"
-    "evented"
+    "observe"
   ]
 
 (require "./#{target}") for target in targets
