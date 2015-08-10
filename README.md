@@ -21,13 +21,13 @@ $(function() {
   var data = { counter: 0 };
 
   F.start(F.flow([
-    F.events("click", $("a[href='#increment']")), F.map(function() {
-      return data.counter++;
-    })
+    F.events("click", $("a[href='#increment']")),
+    F.map(function() { return data.counter++; })
   ]));
 
   F.start(F.flow([
-    F.events("change", F.observe(data)), F.map(function() {
+    F.events("change", F.observe(data)),
+    F.map(function() {
       return $("p.counter").html(data.counter);
     })
   ]));
