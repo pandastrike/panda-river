@@ -82,5 +82,5 @@ Check out the [wiki][] for an getting started guides, tutorials, and reference d
 You can get an idea of what we're planning by looking at the [issues list][200]. If you want something that isn't there, and you think it would be a good addition, please open a ticket.
 
 [tickets]:https://github.com/pandastrike/fairmont/issues
-[fairmont]:https://github.com/pandastrike/fairmont
+[Fairmont]:https://github.com/pandastrike/fairmont
 [wiki]:https://github.com/pandastrike/fairmont/wiki
