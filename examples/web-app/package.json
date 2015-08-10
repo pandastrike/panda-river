@@ -4,22 +4,19 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
-    "fairmont-reactive": "^1.0.0-beta-24",
+    "fairmont-reactive": "^1.0.0-beta-25",
     "coffee-script": "^1.9.3",
     "jquery": "^2.1.4"
   },
   "devDependencies": {
+    "panda-9000": "^1.0.0-alpha-00",
     "browserify": "^11.0.0",
     "express": "^4.13.1",
-    "fairmont": "^1.0.0-beta-20",
-    "jade": "^1.11.0",
     "marked": "^0.3.5",
     "morgan": "^1.6.1",
-    "stylus": "^0.52.0",
     "verse": "^1.0.0-alpha-02"
   },
   "scripts": {
-    "task": "coffee --nodejs --harmony script/runner.coffee",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

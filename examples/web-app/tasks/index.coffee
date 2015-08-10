@@ -1,14 +1,13 @@
 {createWriteStream} = require "fs"
 {join} = require "path"
 {mkdirp, start, flow, map, async} = require "fairmont"
-{glob, compileJade, compileStylus, compileCoffeeScript,
-  writeFile, watchFile} = require "./helpers"
 browserify = require "browserify"
 express = require "express"
 morgan = require "morgan"
 verse = require "verse"
 
-{task} = require "./task"
+{glob, compileJade, compileStylus, compileCoffeeScript,
+  writeFile, watchFile} = require "panda-9000"
 
 task "build", "templates", "css", "bundle"
 
