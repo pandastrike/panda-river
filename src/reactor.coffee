@@ -1,6 +1,6 @@
 W = require "when"
 
-{identity, curry, compose, binary,
+{identity, curry, binary,
   negate} = require "fairmont-core"
 
 # TODO: add this to core?
