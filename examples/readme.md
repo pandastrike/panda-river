@@ -46,8 +46,8 @@ coffee --nodejs --harmony examples/file-watcher.litcoffee
 touch touch src/index.coffee
 ```
 
-## The Web App Example
+## The Counter Web App Example
 
-Instructions for the Web app example [are in the `examples/web-app` directory][0].
+Instructions for the Web app example [are in the `examples/web-apps/counter` directory][0].
 
-[0]:./web-app/readme.md
+[0]:./web-apps/counter/readme.md
