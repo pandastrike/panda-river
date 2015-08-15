@@ -1,4 +1,4 @@
-From the `examples/web-apps/counter` directory, do the following:
+From the `examples/web-apps/todo-list` directory, do the following:
 
 - Install the dependencies for the example.
 
