@@ -1,4 +1,4 @@
-From the `examples/web-app` directory, do the following:
+From the `examples/web-apps/counter` directory, do the following:
 
 - Install the dependencies for the example.
 
@@ -29,6 +29,3 @@ npm run task watch
 ```
 
 (You will still need to reload the browser, but the app should automatically rebuild on each change.)
-
-
-

@@ -4,16 +4,17 @@ $ = require "jquery"
 
 $ ->
 
-  data = counter: 0
+  todos = []
 
   start flow [
-    events "click", $("a[href='#increment']")
-    map -> data.counter++
+    events "change", $("input")
+    map (event) ->
+      console.log arguments
   ]
 
-  start flow [
-    events "change", observe data
-    map ->
-      $("p.counter")
-      .html data.counter
-  ]
+  # start flow [
+  #   events "change", observe data
+  #   map ->
+  #     $("p.counter")
+  #     .html data.counter
+  # ]

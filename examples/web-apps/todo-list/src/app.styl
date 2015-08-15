@@ -12,6 +12,12 @@ a
 p
   rhythm 0.7 3rem
 
+h1, h2, h3, h4, h5, p, blockquote
+  width 70rem
+
+*:focus
+  outline 0
+
 body
 
   display flex
@@ -28,10 +34,31 @@ body
     & > *
       padding-right 4rem
 
-    p
-      a[href='#increment']
-        button()
-        highlight #eee, #172
+  div.main
 
-    p.counter
-      rhythm 0.9 3rem
+    input[type='text']
+      margin-top 2rem
+      width 80rem
+      padding 2rem
+      border none
+      border-bottom 1px solid silver
+      rhythm 0.7 3rem
+
+      &:focus
+        border-bottom 1px solid gray
+
+    ul
+      margin-top 4rem
+      flex: 0 0 100%
+
+      & > li
+        width 100rem
+        rhythm 0.7 3rem
+        display: block
+        margin 0
+        padding 1rem
+        border 1px solid transparent
+
+        &:hover
+          background-color #eee
+          border 1px solid silver

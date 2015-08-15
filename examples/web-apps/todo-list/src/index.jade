@@ -6,15 +6,22 @@ html
     link(rel="stylesheet", href="app.css")
   body
     
-    h1 Fairmont-Reactive Example
-    
+    h1 Fairmont-Reactive Example: A Todo List
+        
     :markdown
-      Both the `Click me!` button and the counter display only know about the counter's data structure. Neither of them know about the other.
+      The text input is used to generate `change` events. On each one, we
+      add items to the `todo` array.
+      In turn, we `obverse` the `todo` array for `change` events. On each
+      one, we regenerate the `ul` HTML.
       
-      Changes to the data structure are automatically reflected in the display without any coupling to how the counter is updated.
+      Each `li` is decorated with checkbox. These, in turn, are used to
+      generate more `change` events. These update the corresponding item
+      in the todo list.
+      No `change` event for the todos array is generated because we're changing the objects `within` the array, not the array itself.
+      
+      As always, each of these event flows is independent from the 
+      others. One flow can be altered without affecting the others.
     
     div.main
-    
-      p: a(href='#increment') Click me!
-      
-      p.counter 0
+      input(type='text', placeholder="Add to-do items here")
+      ul
