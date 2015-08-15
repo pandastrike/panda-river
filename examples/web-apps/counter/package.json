@@ -13,7 +13,7 @@
     "express": "^4.13.1",
     "marked": "^0.3.5",
     "morgan": "^1.6.1",
-    "panda-9000": "^1.0.0-alpha-00",
+    "panda-9000": "^1.0.0-alpha-01",
     "verse": "^1.0.0-alpha-02"
   },
   "scripts": {

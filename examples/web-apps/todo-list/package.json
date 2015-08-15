@@ -9,7 +9,7 @@
     "jquery": "^2.1.4"
   },
   "devDependencies": {
-    "panda-9000": "^1.0.0-alpha-00",
+    "panda-9000": "^1.0.0-alpha-01",
     "browserify": "^11.0.0",
     "express": "^4.13.1",
     "marked": "^0.3.5",
