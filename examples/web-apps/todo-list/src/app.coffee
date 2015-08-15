@@ -24,23 +24,17 @@ $ ->
     else
       "<input id='#{id}' type='checkbox'>"
 
-  buildItem =
+  todoItem = (i, item) ->
+    "<li> #{checkbox i, item.done} #{item.description} </li>"
 
-  buildList = (todos) ->
+  todoList = (todos) ->
     i = 0
-    map ((item) ->
-      """
-      <li>
-        #{checkbox i++, item.done}
-        #{item.description}
-      </li>
-      """),
-      todos
+    map ((item) -> todoItem i++, item), todos
 
   start flow [
     events "change", observe todos
     map (todos) ->
-      ul.html (join buildList todos)
+      ul.html (join todoList todos)
       start flow [
         events "change", $("[type='checkbox']")
         map (event) ->
