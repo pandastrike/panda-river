@@ -1,18 +1,19 @@
 _when = require "when"
 {promise, reject, resolve} = _when
-{curry, compose, binary, identity} = require "fairmont-core"
-{isFunction, isDefined, isPromise, property} = require "fairmont-helpers"
+{apply, pipe, curry, compose, binary, identity} = require "fairmont-core"
+{isEmpty, isFunction, isArray, isDefined, isPromise, property} = require "fairmont-helpers"
 {Method} = require "fairmont-multimethods"
 {producer} = require "./adapters"
 {isIterable, isIterator, isIterator, iterator, next} = require "./iterator"
 {isReagent, isReactor, isReactor, reactor} = require "./reactor"
 
+isProducer = (x) -> (isIterator x) || (isReactor x)
+
 producer = Method.create()
 
 Method.define producer, isIterable, (x) -> iterator x
 Method.define producer, isReagent, (x) -> reactor x
-Method.define producer, isIterator, identity
-Method.define producer, isReactor, identity
+Method.define producer, isProducer, identity
 Method.define producer, isPromise, (p) ->
   _p = p.then (x) -> iterator x
   reactor -> _p.then (i) -> next i
@@ -77,6 +78,14 @@ events = curry binary events
 
 stream = events "data"
 
-flow = ([x, fx...]) -> fx.reduce ((i,f) -> f i), (producer x)
+flow = Method.create()
+
+flow.map = (x) -> [x]
+
+Method.define flow, isDefined, (x, fx...) -> flow (producer x), fx...
+
+Method.define flow, isArray, ([a, ax...]) -> flow a, ax...
+
+Method.define flow, isProducer, (p, fx...) -> apply (pipe fx...), p
 
 module.exports = {producer, pull, repeat, events, stream, flow}

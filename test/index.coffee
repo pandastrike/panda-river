@@ -8,6 +8,7 @@ if targets.length == 0
     "filters"
     "reducers"
     "observe"
+    "helpers"
   ]
 
 (require "./#{target}") for target in targets

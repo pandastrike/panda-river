@@ -1,6 +1,7 @@
 _when = require "when"
 {curry, binary, negate} = require "fairmont-core"
-{isFunction, isDefined, property, query, async} = require "fairmont-helpers"
+{isFunction, isDefined, property,
+  query, async} = require "fairmont-helpers"
 {Method} = require "fairmont-multimethods"
 {iterator, iteratorFunction, isIterator, next} = require "./iterator"
 {reactor, reactorFunction, isReactor} = require "./reactor"
@@ -109,41 +110,40 @@ Method.define split, Function, isIterator, (f, i) ->
   lines = []
   remainder = ""
   iterator ->
-    if lines.length > 0
-      value: lines.shift(), done: false
+    {value, done} = next i
+    if !done
+      [first, lines..., last] = f value
+      first = remainder + first
+      remainder = last
+      {value: first, done}
+    else if lines.length > 0
+      {value: lines.shift(), done: false}
+    else if remainder != ""
+      value = remainder
+      remainder = ""
+      {value, done: false}
     else
-      {value, done} = next i
-      if !done
-        [first, lines..., last] = f value
-        first = remainder + first
-        remainder = last
-        {value: first, done}
-      else if remainder != ""
-        value = remainder
-        remainder = ""
-        {value, done: false}
-      else
-        {done}
+      {done}
 
+{resolve} = require "when"
 Method.define split, Function, isReactor, (f, i) ->
   lines = []
   remainder = ""
   reactor async ->
-    if lines.length > 0
-      value: lines.shift(), done: false
+    ({value, done} = yield next i) unless done
+    if !done
+      [first, lines..., last] = f value
+      first = remainder + first
+      remainder = last
+      {value: first, done}
+    else if lines.length > 0
+      resolve {value: lines.shift(), done: false}
+    else if remainder != ""
+      value = remainder
+      remainder = ""
+      {value, done: false}
     else
-      {value, done} = yield next i
-      if !done
-        [first, lines..., last] = f value
-        first = remainder + first
-        remainder = last
-        {value: first, done}
-      else if remainder != ""
-        value = remainder
-        remainder = ""
-        {value, done: false}
-      else
-        {done}
+      resolve {done}
 
 split = curry binary split
 

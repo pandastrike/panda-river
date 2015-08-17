@@ -17,9 +17,12 @@ isReactor = isAsyncIterator = (x) -> x?.next? && isAsyncIterable x
 reactor = asyncIterator = Method.create()
 
 Method.define reactor, isFunction, (f) ->
-  f.next = f
-  f[Symbol.asyncIterator] = -> @this
-  f
+  g = ->
+    x = f arguments...
+    if isPromise x then x else resolve x
+  g.next = g
+  g[Symbol.asyncIterator] = -> @this
+  g
 
 Method.define reactor, isAsyncIterable, (i) -> i[Symbol.asyncIterator]()
 
