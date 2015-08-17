@@ -65,8 +65,7 @@ Method.define accumulate, Function, (-> true), isIterator,
 Method.define accumulate, Function, (-> true), isReactor,
   (f, k, i) ->
     reactor ->
-      p = next i
-      p.then ({done, value}) ->
+      (next i).then ({done, value}) ->
         if !done
           k = f k, value
           {value: k, done: false}
@@ -137,40 +136,42 @@ Method.define split, Function, isIterator, (f, i) ->
   lines = []
   remainder = ""
   iterator ->
-    {value, done} = next i
-    if !done
-      [first, lines..., last] = f value
-      first = remainder + first
-      remainder = last
-      {value: first, done}
-    else if lines.length > 0
+    if lines.length > 0
       {value: lines.shift(), done: false}
-    else if remainder != ""
-      value = remainder
-      remainder = ""
-      {value, done: false}
     else
-      {done}
+      {value, done} = next i
+      if !done
+        [first, lines..., last] = f value
+        first = remainder + first
+        remainder = last
+        {value: first, done}
+      else if remainder != ""
+        value = remainder
+        remainder = ""
+        {value, done: false}
+      else
+        {done}
 
 {resolve} = require "when"
 Method.define split, Function, isReactor, (f, i) ->
   lines = []
   remainder = ""
   reactor async ->
-    ({value, done} = yield next i) unless done
-    if !done
-      [first, lines..., last] = f value
-      first = remainder + first
-      remainder = last
-      {value: first, done}
-    else if lines.length > 0
+    if lines.length > 0
       {value: lines.shift(), done: false}
-    else if remainder != ""
-      value = remainder
-      remainder = ""
-      {value, done: false}
     else
-      {done}
+      {value, done} = yield next i
+      if !done
+        [first, lines..., last] = f value
+        first = remainder + first
+        remainder = last
+        {value: first, done}
+      else if remainder != ""
+        value = remainder
+        remainder = ""
+        {value, done: false}
+      else
+        {done}
 
 split = curry binary split
 
