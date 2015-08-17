@@ -1,7 +1,8 @@
 _when = require "when"
 {promise, reject, resolve} = _when
 {apply, pipe, curry, compose, binary, identity} = require "fairmont-core"
-{isEmpty, isFunction, isArray, isDefined, isPromise, property} = require "fairmont-helpers"
+{isType, isEmpty, isFunction, isArray, isDefined, isPromise,
+  property} = require "fairmont-helpers"
 {Method} = require "fairmont-multimethods"
 {producer} = require "./adapters"
 {isIterable, isIterator, isIterator, iterator, next} = require "./iterator"
@@ -46,7 +47,9 @@ combine = (px...) ->
       resolved.push x
     else
       p = pending.shift()
-      x.then(p.resolve).catch(p.reject)
+      x
+      .then p.resolve
+      .catch p.reject
 
   dequeue = ->
     if resolved.length == 0
@@ -60,11 +63,19 @@ combine = (px...) ->
   wait = (p) ->
     x = next p
     if isPromise x
-      x.then enqueue
+      x
+      .then (y) ->
+        wait p
+        enqueue x
+      .catch (e) ->
+        enqueue e
+        count--
+        if count == 0
+          done = true
     else
       if !x.done
-        enqueue x
         wait p
+        enqueue x
       else
         count--
         if count == 0

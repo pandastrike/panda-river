@@ -1,5 +1,5 @@
 _when = require "when"
-{curry, binary, negate} = require "fairmont-core"
+{curry, binary, ternary, negate} = require "fairmont-core"
 {isFunction, isDefined, property,
   query, async} = require "fairmont-helpers"
 {Method} = require "fairmont-multimethods"
@@ -72,6 +72,7 @@ Method.define accumulate, Function, (-> true), isReactor,
         else
           {done}
 
+accumulate = curry ternary accumulate
 
 project = curry (p, i) -> map (property p), i
 
