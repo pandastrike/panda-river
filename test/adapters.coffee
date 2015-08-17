@@ -4,8 +4,10 @@ assert = require "assert"
 
 Amen = require "amen"
 
+{next} = require "../src/iterator"
+
 {producer, pull, repeat, events,
-  stream, flow} = require "../src/adapters"
+  stream, flow, combine} = require "../src/adapters"
 
 {map, lines} = require "../src/filters"
 
@@ -42,3 +44,10 @@ Amen.describe "Adapters", (context) ->
     assert (yield i()).value == "two"
     assert (yield i()).value == "three"
     assert (yield i().done)
+
+  context.test "combine", ->
+    a = [1..5]
+    b = [1..5]
+    i = combine a, b
+    (assert !(yield (next i)).done) for j in [1..10]
+    assert (yield (next i)).done

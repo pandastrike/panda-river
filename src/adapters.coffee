@@ -32,6 +32,46 @@ Method.define pull, isReactor, (i) ->
     i().then ({done, value}) ->
       if done then (_when {done}) else value.then (value) -> {done, value}
 
+combine = (px...) ->
+  count = px.length
+  done = false
+  pending = []
+  resolved = []
+
+  enqueue = (x) ->
+    if pending.length == 0
+      resolved.push x
+    else
+      p = pending.shift()
+      x.then(p.resolve).catch(p.reject)
+
+  dequeue = ->
+    if resolved.length == 0
+      if !done
+        promise (resolve, reject) -> pending.push {resolve, reject}
+      else
+        resolve {done}
+    else
+      resolved.shift()
+
+  wait = (p) ->
+    x = next p
+    if isPromise x
+      x.then enqueue
+    else
+      if !x.done
+        enqueue x
+        wait p
+      else
+        count--
+        if count == 0
+          done = true
+
+  (wait (producer p)) for p in px
+
+  reactor dequeue
+
+
 repeat = (x) -> (iterator -> done: false, value: x)
 
 events = Method.create()
@@ -88,4 +128,4 @@ Method.define flow, isArray, ([a, ax...]) -> flow a, ax...
 
 Method.define flow, isProducer, (p, fx...) -> apply (pipe fx...), p
 
-module.exports = {producer, pull, repeat, events, stream, flow}
+module.exports = {producer, pull, repeat, events, stream, flow, combine}

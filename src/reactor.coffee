@@ -1,4 +1,4 @@
-W = require "when"
+{resolve} = require "when"
 
 {identity, curry, binary,
   negate} = require "fairmont-core"
