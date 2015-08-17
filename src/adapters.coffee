@@ -33,6 +33,9 @@ Method.define pull, isReactor, (i) ->
       if done then (_when {done}) else value.then (value) -> {done, value}
 
 combine = (px...) ->
+  # this is basically a cut-and-paste job from the implementation
+  # of ::events below...this suggests there might be a common
+  # function here that both of these could be based on
   count = px.length
   done = false
   pending = []

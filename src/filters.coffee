@@ -47,6 +47,33 @@ select = filter = curry binary select
 
 reject = curry (f, i) -> select (negate f), i
 
+accumulate = Method.create()
+
+Method.define accumulate, Function, (-> true), isDefined,
+  (f, k, x) -> accumulate f, k, (producer x)
+
+Method.define accumulate, Function, (-> true), isIterator,
+  (f, k, i) ->
+    iterator ->
+      {done, value} = next i
+      if !done
+        k = f k, value
+        {value: k, done: false}
+      else
+        {done}
+
+Method.define accumulate, Function, (-> true), isReactor,
+  (f, k, i) ->
+    reactor ->
+      p = next i
+      p.then ({done, value}) ->
+        if !done
+          k = f k, value
+          {value: k, done: false}
+        else
+          {done}
+
+
 project = curry (p, i) -> map (property p), i
 
 compact = select isDefined
@@ -137,13 +164,13 @@ Method.define split, Function, isReactor, (f, i) ->
       remainder = last
       {value: first, done}
     else if lines.length > 0
-      resolve {value: lines.shift(), done: false}
+      {value: lines.shift(), done: false}
     else if remainder != ""
       value = remainder
       remainder = ""
       {value, done: false}
     else
-      resolve {done}
+      {done}
 
 split = curry binary split
 
@@ -194,5 +221,6 @@ Method.define pump, isStreamLike, isReactor,
 
 pump = curry binary pump
 
-module.exports = {map, select, filter, reject, project, compact,
-  partition, take, takeN, where, split, lines, tee, throttle, pump}
+module.exports = {map, accumulate, select, filter, reject,
+  project, compact, partition, take, takeN, where,
+  split, lines, tee, throttle, pump}
