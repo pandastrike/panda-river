@@ -10,9 +10,10 @@ either = curry (f, g) -> -> (f arguments...) || (g arguments...)
 {property, query, has, isFunction, isGenerator, isDefined,
   isPromise, async} = require "fairmont-helpers"
 
-isReagent = isAsyncIterable = (x) -> x?[Symbol.asyncIterator]?
+isReagent = isAsyncIterable = (x) -> (isFunction x?[Symbol.asyncIterator])
 
-isReactor = isAsyncIterator = (x) -> x?.next? && isAsyncIterable x
+isReactor = isAsyncIterator = (x) ->
+  (isFunction x?.next) && (isAsyncIterable x)
 
 reactor = asyncIterator = Method.create()
 
