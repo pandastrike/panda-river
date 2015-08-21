@@ -2,6 +2,7 @@ assert = require "assert"
 Amen = require "amen"
 {promise} = require "when"
 
+{next} = require "../src/iterator"
 {events} = require "../src/adapters"
 {observe} = require "../src/observe"
 
@@ -9,31 +10,33 @@ Amen.describe "Observe", (context) ->
 
   # TODO: this is not a great test, since it doesn't return if it fails
   context.test "change events", ->
-    x = foo: 5, bar: baz: 3
-    z = observe x
-    p = promise (resolve) ->
-      z.once "change", -> resolve()
-    x.foo = 7
-    yield p
+    y = undefined
+    x = value: 7
+    observe x
+    .on "change", (x) -> y = x.value
+    x.value = 3
+    setImmediate -> assert y == 3
 
     context.test "nested change events", ->
-      p = promise (resolve) ->
-        z.once "change", -> resolve()
-      x.bar.baz = 5
-      yield p
+      y = undefined
+      x = value: value: 7
+      observe x
+      .on "change", (x) -> y = x.value
+      x.value.value = 3
+      setImmediate -> assert y == 3
 
   context.test "for arrays", ->
+    y = undefined
     x = [1..5]
-    z = observe x
-    p = promise (resolve) ->
-      z.once "change", -> resolve()
-    x.shift()
-    yield p
+    observe x
+    .on "change", (x) -> y = x[3]
+    x[3] = 0
+    setImmediate -> assert y == 0
 
 
   context.test "as event stream", ->
-    x = foo: 5
-    z = observe x
-    i = events "change", z
-    x.foo = 7
-    yield i()
+    y = undefined
+    x = value: 7
+    i = events "change", observe x
+    x.value = 3
+    assert (yield next i).value.value == 3

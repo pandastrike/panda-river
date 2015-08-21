@@ -111,13 +111,21 @@ Method.define zip, Function, isIterator, isIterator,
       else
         done: true
 
-unzip = (f, i) -> fold f, [[],[]], i
+# The semantics of unzip are sort of poorly defined, especially given that
+# zip actually takes a function. But for unzip to take a function seems
+# pointless, and to call it unzip if the inverse is actually `zip pair`
+# seems like a misnomer. Also, I have no idea if this function is actually
+# useful--it was only added for symmetry.
+
+# unzip = (i) -> fold f, [[],[]], i
 
 _assoc = (object, [key, value]) ->
   object[key] = value
   object
 
 assoc = reduce _assoc, {}
+
+# TODO: Should flatten be a producer?
 
 _flatten = (ax, a) ->
   if isIterable a
@@ -142,5 +150,5 @@ delimit = curry (d, i) ->
   fold f, "", i
 
 module.exports = {reduce, fold, reduce, foldr, reduceRight,
-  collect, each, start, any, all, zip, unzip, assoc, flatten,
+  collect, each, start, any, all, zip, assoc, flatten,
   sum, average, join, delimit}

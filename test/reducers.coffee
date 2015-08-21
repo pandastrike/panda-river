@@ -5,7 +5,7 @@ Amen = require "amen"
 {first, add, odd, push, w} = require "fairmont-helpers"
 
 {reduce, fold, reduce, foldr, reduceRight,
-  collect, each, start, any, all, zip, unzip, assoc, flatten,
+  collect, each, start, any, all, zip, assoc, flatten,
   sum, average, join, delimit} = require "../src/reducers"
 
 Amen.describe "Reducers", (context) ->
@@ -38,13 +38,13 @@ Amen.describe "Reducers", (context) ->
     assert i().value[0] == 3
     assert i().done
 
-  context.test "unzip", ->
-    pair = (x, y) -> [x, y]
-    unpair = ([ax, bx], [a, b]) ->
-      ax.push a
-      bx.push b
-      [ax, bx]
-    assert (unzip unpair, zip pair, "panama", "canary")[0][0] == "p"
+  # context.test "unzip", ->
+  #   pair = (x, y) -> [x, y]
+  #   unpair = ([ax, bx], [a, b]) ->
+  #     ax.push a
+  #     bx.push b
+  #     [ax, bx]
+  #   assert (unzip unpair, zip pair, "panama", "canary")[0][0] == "p"
 
   context.test "assoc", ->
     assert (assoc [["foo", 1], ["bar", 2]]).foo == 1
