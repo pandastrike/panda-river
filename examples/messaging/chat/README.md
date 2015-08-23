@@ -1,6 +1,6 @@
 _This example is still under construction._
 
-The idea here is to use Mutual to create a reactive-systems style chat app. Since Mutual treats messages as events produced by event emitters, it's straightforward to pass those to Fairmont's `events` function and build flows from that.
+The idea here is to [use Mutual to create a reactive-systems style chat app](https://github.com/pandastrike/fairmont/issues/50). Since Mutual treats messages as events produced by event emitters, it's straightforward to pass those to Fairmont's `events` function and build flows from that.
 
 The problem at this stage is that Mutual depends on an old version of Fairmont. What's worse, the dependency isn't fixed to that version, so when you install Mutual, it figures the latest Fairmont will be okay.
 
