@@ -1,8 +1,7 @@
 {
-  "name": "web-app",
+  "name": "todo-list",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "Fairmont To-Do List Example",
   "dependencies": {
     "fairmont-reactive": "^1.0.0-beta-25",
     "coffee-script": "^1.9.3",
@@ -16,9 +15,5 @@
     "morgan": "^1.6.1",
     "verse": "^1.0.0-alpha-02"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
   "license": "ISC"
 }
