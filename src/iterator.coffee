@@ -5,15 +5,15 @@
 {isFunction, isGenerator, isDefined,
   isPromise, async} = require "fairmont-helpers"
 
-isIterable = (x) -> (isFunction x?[Symbol.iterator]) || (x? && isGenerator x)
+isIterable = (x) -> (x? && (isFunction x[Symbol.iterator]) || (isGenerator x))
 
-isIterator = (x) -> (isFunction x?.next) && (isIterable x)
+isIterator = (x) -> (x? && (isFunction x.next) && (isIterable x))
 
 iterator = Method.create()
 
 Method.define iterator, isFunction, (f) ->
   f.next = f
-  f[Symbol.iterator] = -> @this
+  f[Symbol.iterator] = -> f
   f
 
 Method.define iterator, isIterable, (i) -> i[Symbol.iterator]()
