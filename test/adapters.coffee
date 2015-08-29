@@ -4,7 +4,7 @@ assert = require "assert"
 
 Amen = require "amen"
 
-{next} = require "../src/iterator"
+{next, value, isDone} = require "../src/iterator"
 
 {producer, pull, repeat, events,
   stream, flow, combine} = require "../src/adapters"
@@ -24,6 +24,18 @@ Amen.describe "Adapters", (context) ->
     assert (yield i()).done
 
   context.test "flow", ->
+    i = flow [
+      [1..5]
+      map (n) -> n * 2
+    ]
+    assert 2 == value next i
+    assert 4 == value next i
+    assert 6 == value next i
+    assert 8 == value next i
+    assert 10 == value next i
+    assert isDone next i
+
+  context.test "flow (reactive)", ->
 
     i = flow [
       stream createReadStream "./test/data/lines.txt"

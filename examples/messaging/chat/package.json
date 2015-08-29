@@ -1,0 +1,9 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "Fairmont Chat Example",
+  "license": "ISC",
+  "dependencies": {
+    "mutual": "^1.0.0-alpha-04"
+  }
+}
