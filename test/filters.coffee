@@ -5,7 +5,7 @@ _when = require "when"
 assert = require "assert"
 Amen = require "amen"
 
-{next} = require "../src/iterator"
+{value, next} = require "../src/iterator"
 
 {map, accumulate, select, filter, reject, project, compact,
   partition, take, takeN, where, split, lines, tee,
@@ -24,6 +24,15 @@ Amen.describe "Filters", (context) ->
     assert i().value == 2
     assert i().value == 3
     assert i().done
+
+  context.test "tee (reactor)", ->
+    n = 0
+    increment = (x) -> n += x
+    i = tee increment, (counter 1)
+    assert 1 == value yield next i
+    assert 2 == value yield next i
+    assert 3 == value yield next i
+    assert 6 == n
 
   context.test "accumulate", ->
     add = (x, y) -> x + y

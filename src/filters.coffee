@@ -178,15 +178,31 @@ split = curry binary split
 
 lines = split (s) -> s.toString().split("\n")
 
-# TODO: need to add synchronous version
+tee = Method.create()
 
-tee = curry (f, i) ->
+Method.define tee, Function, isDefined, (f, x) -> tee f, (producer x)
+
+Method.define tee, Function, isReactor, (f, r) ->
   reactor ->
-    (next i).then ({done, value}) ->
-      (f value) unless done
-      {done, value}
+    (next r).then ({done, value}) ->
+      unless done
+        # this bit of curious logic ensures that we return a promise
+        # if f is actually async, that is, returns a promise.
+        # that promise will resolve to the original value, but not until
+        # f resolves it. this allows tee to be used when the caller
+        # depends upon f having returned
+        ((f value)?.then? -> {done, value}) || {done, value}
+      else {done}
 
-# TODO: need to add synchronous version
+Method.define tee, Function, isIterator, (f, i) ->
+  iterator ->
+    {done, value} = next i
+    unless done
+      # see above...
+      ((f value)?.then? -> {done, value}) || {done, value}
+    else {done}
+
+tee = curry binary tee
 
 throttle = curry (ms, i) ->
   last = 0
