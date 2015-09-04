@@ -7,8 +7,6 @@ We create the server just like we usually would, except we don't set up a callba
     net = require "net"
     server = net.createServer().listen(1337)
 
-The `flow` function takes an array of functions and returns an iterator. Basically, it's like `pipe`, which works like the `compose`, but with the arguments reversed. This allows us to place the operations in the sequence they'll actually occur. In addition, `flow`, knowing that the end result is intended to be used as an iterator function, creates an iterator function from the result of the composition.
-
 Let's grab the necessary building blocks from Fairmont.
 
     {go, events, tee, stream, pump} = require "../src/index"
@@ -17,9 +15,7 @@ We can start our flow with `go`.
 
     go [
 
-The first expression in a flow array must be a producer (an iterator or reactor).
-
-We're going use `events` to take a server that emits connection events and returns an iterator that produces connections. The `events` function can take an events map. Here, we're specifying that a `close` event ends the iteration.
+The first expression in a flow array must be a producer (an iterator or reactor). We're going use `events` to take a server that emits connection events and returns an iterator that produces connections. The `events` function can take an events map. Here, we're specifying that a `close` event ends the iteration.
 
       events name: "connection", end: "close", server
 
