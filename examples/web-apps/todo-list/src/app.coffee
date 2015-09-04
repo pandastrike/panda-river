@@ -1,4 +1,4 @@
-{start, flow, events, map, join, observe} = require "fairmont-reactive"
+{go, events, map, join, observe} = require "fairmont-reactive"
 
 $ = require "jquery"
 
@@ -9,7 +9,7 @@ $ ->
   input = $("input")
   ul = $("ul")
 
-  start flow [
+  go [
     events "change", input
     map (event) ->
       todos.push
@@ -31,11 +31,11 @@ $ ->
     i = 0
     map ((item) -> todoItem i++, item), todos
 
-  start flow [
+  go [
     events "change", observe todos
     map (todos) ->
       ul.html (join todoList todos)
-      start flow [
+      go [
         events "change", $("[type='checkbox']")
         map (event) ->
           id = $(event.target).attr("id")
