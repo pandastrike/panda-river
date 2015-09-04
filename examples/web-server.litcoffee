@@ -14,39 +14,51 @@ Instead, we're going to use it to generate request/response pairs.
 
 We'll define a very silly logger, for demonstration purposes.
 
-    logger = (request, response) ->
-      console.log request.method, request.url, response.statusCode
+    logger = ({request, response}) ->
+      {method, url} = request
+      code = response.statusCode
+      console.log "#{method} #{url} - #{code}"
 
 Let's pick up a few building blocks from Fairmont.
 
     {spread, spread} = require "fairmont"
-    {start, flow, events, select, tee, map, iterator} = require "../src"
+    {go, events, select, tee, map} = require "../src"
 
 We're ready now to implement our Web server.
+We kick things off with `go`.
 
-    start flow [
+    go [
+
+We pick up request events from the server.
+
       events "request", server
-      select spread (request) -> request.method == "GET"
-      select spread (request) -> request.url == "/"
-      tee spread (ignored, response) ->
-        response.statusCode = 200
-        response.write "hello, world"
-        response.end()
-      map spread logger
+
+We create a request context.
+Since `events` produces an array for events whose handlers take multiple arguments, we use `spread` to take that array and turn it back into an argument list.
+
+      map spread (request, response) -> {request, response}
+
+We use `tee` to process the request, but also pass it on to the next function in our middleware stack.
+
+      tee ({request, response}) ->
+
+We have a very simple request processor that only handles `GET /` requests.
+
+        {method, url} = request
+        if url == "/"
+          if method == "GET"
+            response.statusCode = 200
+            response.end "hello, world"
+          else
+            response.statusCode = 405
+            response.end "Method Not Allowed"
+        else
+          response.statusCode = 404
+          response.end "Not Found"
+
+We pass the request to next function in our middleware stack, the logger.
+
+      tee logger
     ]
 
-We kick off the flow, as always, with `start flow`.
-We pick up request events from the server.
-Since `events` produces an array for events whose handlers take multiple arguments, we use `spread` to take that array and turn it back into an argument list.
-We're only interested here in `GET` requests, so we use `select` to filter out others requests.
-We're going to further narrow our interest to only the root resource.
-In real life, you might use a request classifier here.
-We might also do, say, authentication here.
-We respond with a status code of `200` and content body of `hello, world`.
-The `tee` function returns an iterator function that operates on the value produced by the iterator, but then produces the original value.
-(In contrast to `map`, which produces the result of applying the function.)
-It's kind of like calling `next` with conventional middleware.
-This allows us to do something with the request, but also pass it along to the next iterator function.
-Finally, we log the result.
-
-As you can see, this works a lot of like middleware in a package like Express. FRP style effectively allows us to replicate middleware with no extra code.
+As you can see, functional reactive programming allows us to implement a middleware-like design with no additional framework code.
