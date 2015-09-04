@@ -11,31 +11,27 @@ The `flow` function takes an array of functions and returns an iterator. Basical
 
 Let's grab the necessary building blocks from Fairmont.
 
-    {start, flow, events, map, stream, pump} = require "../src/index"
+    {go, events, tee, stream, pump} = require "../src/index"
 
-As with any iterator, you must ultimately pass it to a function that uses it. The purpose of most such functions, such as `collect` or `reduce`, is to return a value based on the iteration. However, the purpose of some iterators is simply to start an event or processing loop, as is typically the case with `flow`. The `start` function allows you to kick of such a loop.
+We can start our flow with `go`.
 
-The first expression in a flow should evaluate to an iterator. Subsequent expressions must evaluate to functions that _take_ an iterator. However, the first expression effectively bootstraps the flow.
+    go [
 
-Again, it would have been simpler to just write `s.pipe(s)`, but the point here is to illustrate how a flow works.
-
-We're ready to start our main flow.
-
-    start flow [
+The first expression in a flow array must be a producer (an iterator or reactor).
 
 We're going use `events` to take a server that emits connection events and returns an iterator that produces connections. The `events` function can take an events map. Here, we're specifying that a `close` event ends the iteration.
 
       events name: "connection", end: "close", server
 
-The `map` function returns an iterator, but here we're simplying currying it—notice we don't pass an iterator, just a function. This evalutes to a function that will take an iterator and produce another iterator. We use `map` to define a nested flow for handling the connection stream.
+We use `tee` to introduce a nested flow for handling the connection stream.
 
-      map (s) ->
-        start flow [
+      tee (s) ->
+        go [
           stream s
           pump s
         ]
     ]
 
-The `stream` function takes a stream and returns an iterator that produces values from the stream. Then we write these back to the connection with `pump`. The `pump` function, given a stream and an iterator, writes the values produced by the iterator to the stream. The `pump` function is curried here, so that it can take the iterator produced by `stream`.
+The `stream` function takes a stream and returns an iterator that produces values from the stream. Then we write these back to the connection with `pump`.
 
 In this simple example, that's the end of the flow. There's not much to it. We get a connections and stream them back into themselves. However, we could have replaced the echo flow with something that processes the input and does something more interesting.
