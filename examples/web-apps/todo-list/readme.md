@@ -9,13 +9,13 @@ npm install
 - Run the build task.
 
 ```
-p9k build
+node_modules/.bin/p9k build
 ```
 
 - Run the Web server.
 
 ```
-p9k serve
+node_modules/.bin/p9k serve
 ```
 
 ```
