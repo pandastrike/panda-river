@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
-    "fairmont-reactive": "^1.0.0-beta-25",
+    "fairmont-reactive": "1.0.0-beta-32",
     "coffee-script": "^1.9.3",
     "jquery": "^2.1.4"
   },
@@ -13,7 +13,7 @@
     "express": "^4.13.1",
     "marked": "^0.3.5",
     "morgan": "^1.6.1",
-    "panda-9000": "^1.0.0-alpha-01",
+    "panda-9000": "1.0.0-alpha-01",
     "verse": "^1.0.0-alpha-02"
   },
   "scripts": {

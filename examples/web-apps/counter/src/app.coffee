@@ -1,4 +1,4 @@
-{start, flow, events, map, observe} = require "fairmont-reactive"
+{go, events, map, observe} = require "fairmont-reactive"
 
 $ = require "jquery"
 
@@ -6,12 +6,12 @@ $ ->
 
   data = counter: 0
 
-  start flow [
+  go [
     events "click", $("a[href='#increment']")
     map -> data.counter++
   ]
 
-  start flow [
+  go [
     events "change", observe data
     map ->
       $("p.counter")
