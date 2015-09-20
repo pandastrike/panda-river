@@ -103,7 +103,7 @@ Method.define partition, Number, isReactor, (n, i) ->
       break if batch.length == n
     if done then {done} else {value: batch, done}
 
-# TODO: add asynchronous version
+partition = curry binary partition
 
 take = Method.create()
 
@@ -238,6 +238,31 @@ Method.define pump, isStreamLike, isReactor,
         {done, value: s}
 
 pump = curry binary pump
+
+# TODO: filter version of flatten
+
+# This version of flatten has very limited scope. It only deals with arrays,
+# not producibles in general. This is good enough for our purposes here, to
+# illlustrate the idea.
+
+# flatten = (i) ->
+#   stack = []
+#   _next = ->
+#     {done, value} = next r
+#     if !done
+#       if isArray value && !empty value
+#         stack.push i
+#         i = product value
+#         do _next
+#       else
+#         {done, value}
+#     else
+#       if !empty stack
+#         i = stack.pop()
+#         do _next
+#       else
+#         {done}
+#   iterator -> do _next
 
 module.exports = {map, accumulate, select, filter, reject,
   project, compact, partition, take, takeN, where,
