@@ -15,10 +15,10 @@ next = (i) -> i.next()
 
 fold = Method.create()
 
-Method.define fold, Function, (-> true), isDefined,
+Method.define fold, isFunction, ((x) -> true), isDefined,
   (f, x, y) -> fold x, f, (producer y)
 
-Method.define fold, Function, (-> true), isIterator,
+Method.define fold, isFunction, ((x) -> true), isIterator,
   (f, x, i) ->
     loop
       {done, value} = next i
@@ -26,7 +26,7 @@ Method.define fold, Function, (-> true), isIterator,
       x = f x, value
     x
 
-Method.define fold, Function, (-> true), isReactor,
+Method.define fold, isFunction, ((x) -> true), isReactor,
   async (f, x, i) ->
     loop
       {done, value} = yield next i
@@ -34,23 +34,23 @@ Method.define fold, Function, (-> true), isReactor,
       x = f x, value
     x
 
-Method.define fold, Function, (-> true), isArray,
+Method.define fold, isFunction, ((x) -> true), isArray,
   (f, x, ax) -> ax.reduce f, x
 
 reduce = fold = curry ternary fold
 
 foldr = Method.create()
 
-Method.define foldr, Function, (-> true), isDefined,
+Method.define foldr, isFunction, ((x) -> true), isDefined,
   (f, x, y) -> foldr f, x, (producer y)
 
-Method.define foldr, Function, (-> true), isIterator,
+Method.define foldr, isFunction, ((x) -> true), isIterator,
   (f, x, i) -> (collect i).reduceRight f, x
 
-Method.define foldr, Function, (-> true), isReactor,
+Method.define foldr, isFunction, ((x) -> true), isReactor,
   (f, x, i) -> (collect i).then (ax) -> ax.reduceRight f, x
 
-Method.define foldr, Function, (-> true), isArray,
+Method.define foldr, isFunction, ((x) -> true), isArray,
   (f, x, ax) -> ax.reduceRight f, x
 
 reduceRight = foldr = curry ternary foldr
@@ -65,17 +65,17 @@ start = reduce noOp, undefined
 
 any = Method.create()
 
-Method.define any, Function, isDefined, (f, x) ->
+Method.define any, isFunction, isDefined, (f, x) ->
   any f, (producer x)
 
-Method.define any, Function, isIterator,
+Method.define any, isFunction, isIterator,
   (f, i) ->
     loop
       ({done, value} = next i)
       break if (done || (f value))
     !done
 
-Method.define any, Function, isReactor,
+Method.define any, isFunction, isReactor,
   async (f, i) ->
     loop
       ({done, value} = yield next i)
@@ -86,22 +86,22 @@ any = curry binary any
 
 all = Method.create()
 
-Method.define all, Function, isDefined, (f, x) -> all f, (producer x)
+Method.define all, isFunction, isDefined, (f, x) -> all f, (producer x)
 
-Method.define all, Function, isIterator,
+Method.define all, isFunction, isIterator,
   (f, i) -> !any (negate f), i
 
-Method.define all, Function, isReactor,
+Method.define all, isFunction, isReactor,
   async (f, i) -> !(yield any (negate f), i)
 
 all = curry binary all
 
 zip = Method.create()
 
-Method.define zip, Function, isDefined, isDefined,
+Method.define zip, isFunction, isDefined, isDefined,
   (f, x, y) -> zip f, (producer x), (producer y)
 
-Method.define zip, Function, isIterator, isIterator,
+Method.define zip, isFunction, isIterator, isIterator,
   (f, i, j) ->
     iterator ->
       x = next i

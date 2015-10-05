@@ -11,7 +11,7 @@ Amen = require "amen"
   partition, take, takeN, where, split, lines, tee,
   throttle, pump} = require "../src/filters"
 
-{odd, w} = require "fairmont"
+{odd, w} = require "fairmont-helpers"
 
 {reactor} = require "../src/reactor"
 counter = (n = 0) -> reactor -> _when {done: false, value: n++}

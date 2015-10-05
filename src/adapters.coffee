@@ -134,15 +134,17 @@ stream = events "data"
 
 flow = Method.create()
 
-# since this can be a variable argument function,
-# we dispatch on the first argument and group the remaining
-# arguments, if there are any, into an array
-flow.map = (a, ax...) -> if ax.length > 0 then [a, ax] else [a]
+isFunctionList = (fx...) ->
+  for f in fx
+    return false if !isFunction f
+  true
 
-Method.define flow, isDefined, isArray, (x, fx...) -> flow (producer x), fx...
+Method.define flow, isDefined, isFunctionList,
+  (x, fx...) -> flow (producer x), fx...
 
 Method.define flow, isArray, (ax) -> flow ax...
 
-Method.define flow, isProducer, isArray, (p, fx...) -> apply (pipe fx...), p
+Method.define flow, isProducer, isFunctionList,
+  (p, fx...) -> apply (pipe fx...), p
 
 module.exports = {producer, pull, repeat, events, stream, flow, combine}

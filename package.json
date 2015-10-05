@@ -10,9 +10,9 @@
   ],
   "main": "lib/index.js",
   "scripts": {
-    "prepublish": "coffee --nodejs --harmony -o lib/ -c src/*.*coffee",
-    "test": "coffee --nodejs --harmony test/index.coffee",
-    "watch": "coffee --nodejs --harmony -o lib/ -cw src/*.*coffee",
+    "prepublish": "coffee -o lib/ -c src/*.*coffee",
+    "test": "coffee test/index.coffee",
+    "watch": "coffee -o lib/ -cw src/*.*coffee",
     "version": "(node_modules/.bin/json -f package.json version > VERSION)",
     "tag": "(cat VERSION | xargs -I version git tag -am version version) && git push --tags"
   },
@@ -27,7 +27,6 @@
   "license": "ISC",
   "devDependencies": {
     "amen": "^1.0.0-alpha-03",
-    "fairmont": "^1.0.0-beta-19",
     "harmony-reflect": "^1.4.0",
     "json": "^9.0.3"
   },
@@ -37,5 +36,5 @@
     "fairmont-multimethods": "^1.0.0-beta-19",
     "when": "^3.7.3"
   },
-  "engine": "node >= 0.12.x"
+  "engine": "node >= 4.0.x"
 }

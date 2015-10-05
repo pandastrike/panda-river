@@ -9,15 +9,15 @@ _when = require "when"
 
 map = Method.create()
 
-Method.define map, Function, isDefined,
+Method.define map, isFunction, isDefined,
   (f, x) -> map f, (producer x)
 
-Method.define map, Function, isIterator, (f, i) ->
+Method.define map, isFunction, isIterator, (f, i) ->
   iterator ->
     {done, value} = next i
     if done then {done} else {done, value: (f value)}
 
-Method.define map, Function, isReactor, (f, i) ->
+Method.define map, isFunction, isReactor, (f, i) ->
   reactor ->
     (next i).then ({done, value}) ->
       if done then {done} else {done, value: (f value)}
@@ -26,10 +26,10 @@ map = curry binary map
 
 select = Method.create()
 
-Method.define select, Function, isDefined,
+Method.define select, isFunction, isDefined,
   (f, x) -> select f, (producer x)
 
-Method.define select, Function, isIterator,
+Method.define select, isFunction, isIterator,
   (f, i) ->
     iterator ->
       loop
@@ -37,7 +37,7 @@ Method.define select, Function, isIterator,
         break if done || (f value)
       {done, value}
 
-Method.define select, Function, isReactor,
+Method.define select, isFunction, isReactor,
   (f, i) ->
     p = (({done, value}) -> done || (f value))
     j = -> next i
@@ -49,10 +49,10 @@ reject = curry (f, i) -> select (negate f), i
 
 accumulate = Method.create()
 
-Method.define accumulate, Function, (-> true), isDefined,
+Method.define accumulate, isFunction, ((x) -> true), isDefined,
   (f, k, x) -> accumulate f, k, (producer x)
 
-Method.define accumulate, Function, (-> true), isIterator,
+Method.define accumulate, isFunction, ((x) -> true), isIterator,
   (f, k, i) ->
     iterator ->
       {done, value} = next i
@@ -62,10 +62,10 @@ Method.define accumulate, Function, (-> true), isIterator,
       else
         {done}
 
-Method.define accumulate, Function, (-> true), isReactor,
-  (f, k, i) ->
+Method.define accumulate, isFunction, ((x) -> true), isReactor,
+  (f, k, r) ->
     reactor ->
-      (next i).then ({done, value}) ->
+      (next r).then ({done, value}) ->
         if !done
           k = f k, value
           {value: k, done: false}
@@ -107,10 +107,10 @@ partition = curry binary partition
 
 take = Method.create()
 
-Method.define take, Function, isDefined,
+Method.define take, isFunction, isDefined,
   (f, x) -> take f, (producer x)
 
-Method.define take, Function, isIterator,
+Method.define take, isFunction, isIterator,
   (f, i) ->
     iterator ->
       if !done
@@ -130,10 +130,10 @@ where = curry (example, i) -> select (query example), i
 
 split = Method.create()
 
-Method.define split, Function, isDefined,
+Method.define split, isFunction, isDefined,
   (f, x) -> split f, (producer x)
 
-Method.define split, Function, isIterator, (f, i) ->
+Method.define split, isFunction, isIterator, (f, i) ->
   lines = []
   remainder = ""
   iterator ->
@@ -154,7 +154,7 @@ Method.define split, Function, isIterator, (f, i) ->
         {done}
 
 {resolve} = require "when"
-Method.define split, Function, isReactor, (f, i) ->
+Method.define split, isFunction, isReactor, (f, i) ->
   lines = []
   remainder = ""
   reactor async ->
@@ -180,9 +180,9 @@ lines = split (s) -> s.toString().split("\n")
 
 tee = Method.create()
 
-Method.define tee, Function, isDefined, (f, x) -> tee f, (producer x)
+Method.define tee, isFunction, isDefined, (f, x) -> tee f, (producer x)
 
-Method.define tee, Function, isReactor, (f, r) ->
+Method.define tee, isFunction, isReactor, (f, r) ->
   reactor ->
     (next r).then ({done, value}) ->
       unless done
@@ -194,7 +194,7 @@ Method.define tee, Function, isReactor, (f, r) ->
         ((f value)?.then? -> {done, value}) || {done, value}
       else {done}
 
-Method.define tee, Function, isIterator, (f, i) ->
+Method.define tee, isFunction, isIterator, (f, i) ->
   iterator ->
     {done, value} = next i
     unless done
