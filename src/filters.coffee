@@ -17,9 +17,9 @@ Method.define map, isFunction, isIterator, (f, i) ->
     {done, value} = next i
     if done then {done} else {done, value: (f value)}
 
-Method.define map, isFunction, isReactor, (f, i) ->
+Method.define map, isFunction, isReactor, (f, r) ->
   reactor ->
-    (next i).then ({done, value}) ->
+    (next r).then ({done, value}) ->
       if done then {done} else {done, value: (f value)}
 
 map = curry binary map
