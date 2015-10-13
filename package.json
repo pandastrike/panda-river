@@ -1,6 +1,6 @@
 {
   "name": "fairmont-reactive",
-  "version": "1.0.0-beta-36",
+  "version": "1.0.0-beta-37",
   "description": "Functional reactive programming in JavaScript and CoffeeScript.",
   "files": [
     "lib/",

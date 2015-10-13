@@ -19,19 +19,23 @@ Method.define producer, isPromise, (p) ->
   _p = p.then (x) -> iterator x
   reactor -> _p.then (i) -> next i
 
+_pull = ({done, value}) ->
+  if done
+    (_when {done})
+  else if value.then?
+    value.then (value) -> {done, value}
+  else
+    {done, value}
+
 pull = Method.create()
 
 Method.define pull, isDefined, (x) -> pull producer x
 
 Method.define pull, isIterator, (i) ->
-  reactor ->
-    {done, value} = next i
-    if done then (_when {done}) else value.then (value) -> {done, value}
+  reactor -> _pull next i
 
 Method.define pull, isReactor, (i) ->
-  reactor ->
-    i().then ({done, value}) ->
-      if done then (_when {done}) else value.then (value) -> {done, value}
+  reactor -> (next i).then _pull
 
 combine = (px...) ->
   # this is basically a cut-and-paste job from the implementation
