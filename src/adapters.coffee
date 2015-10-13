@@ -22,7 +22,7 @@ Method.define producer, isPromise, (p) ->
 _pull = ({done, value}) ->
   if done
     (_when {done})
-  else if value.then?
+  else if value?.then?
     value.then (value) -> {done, value}
   else
     {done, value}
