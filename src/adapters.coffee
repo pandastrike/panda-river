@@ -1,7 +1,7 @@
 _when = require "when"
 {promise, reject, resolve} = _when
 {apply, pipe, curry, compose, binary, identity} = require "fairmont-core"
-{isType, isEmpty, isFunction, isArray, isDefined, isPromise,
+{isType, isString, isObject, isEmpty, isFunction, isArray, isDefined, isPromise,
   property} = require "fairmont-helpers"
 {Method} = require "fairmont-multimethods"
 {producer} = require "./adapters"
@@ -95,10 +95,10 @@ repeat = (x) -> (iterator -> done: false, value: x)
 events = Method.create()
 isSource = compose isFunction, property "on"
 
-Method.define events, String, isSource, (name, source) ->
+Method.define events, isString, isSource, (name, source) ->
   events {name, end: "end", error: "error"}, source
 
-Method.define events, Object, isSource, (map, source) ->
+Method.define events, isObject, isSource, (map, source) ->
   {name, end, error} = map
   end ?= "end"
   error ?= "error"
@@ -125,6 +125,7 @@ Method.define events, Object, isSource, (map, source) ->
   source.on name, (ax...) ->
     value = if ax.length < 2 then ax[0] else ax
     enqueue resolve {done, value}
+
   source.on end, (error) ->
     done = true
     enqueue resolve {done}
