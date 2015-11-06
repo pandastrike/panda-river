@@ -17,18 +17,18 @@ Amen.describe "Adapters", (context) ->
 
   context.test "pull (non-promise)"
 
-  context.test "pull (undefined)", ->
-    i = flow [
-      [1..5]
-      map (x) -> undefined
-      pull
-    ]
-    assert next i
-    assert next i
-    assert next i
-    assert next i
-    assert next i
-    assert isDone i
+  context.test "pull (undefined)" #, ->
+    # i = flow [
+    #   [1..5]
+    #   map (x) -> undefined
+    #   pull
+    # ]
+    # assert next i
+    # assert next i
+    # assert next i
+    # assert next i
+    # assert next i
+    # assert isDone i
 
   context.test "events", ->
     i = events "data", createReadStream "test/data/lines.txt"
