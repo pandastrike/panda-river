@@ -34,6 +34,8 @@ Amen.describe "Filters", (context) ->
     assert 3 == value yield next i
     assert 6 == n
 
+  context.test "tee (iterator returning promise values)"
+
   context.test "accumulate", ->
     add = (x, y) -> x + y
     i = accumulate add, 0, [1..5]

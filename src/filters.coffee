@@ -91,7 +91,10 @@ Method.define partition, Number, isIterator, (n, i) ->
       break if done
       batch.push value
       break if batch.length == n
-    if done then {done} else {value: batch, done}
+    if done && batch.length == 0
+      {done}
+    else
+      {value: batch, done}
 
 Method.define partition, Number, isReactor, (n, i) ->
   reactor async ->
@@ -101,7 +104,10 @@ Method.define partition, Number, isReactor, (n, i) ->
       break if done
       batch.push value
       break if batch.length == n
-    if done then {done} else {value: batch, done}
+    if done && batch.length == 0
+      {done}
+    else
+      {value: batch, done}
 
 partition = curry binary partition
 
@@ -199,7 +205,7 @@ Method.define tee, isFunction, isIterator, (f, i) ->
     {done, value} = next i
     unless done
       # see above...
-      ((f value)?.then? -> {done, value}) || {done, value}
+      {done, value: ((f value)?.then? -> value) || value}
     else {done}
 
 tee = curry binary tee
