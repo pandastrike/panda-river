@@ -6,7 +6,7 @@ Amen = require "amen"
 
 {reduce, fold, reduce, foldr, reduceRight,
   collect, each, start, any, all, zip, assoc, flatten,
-  sum, average, join, delimit} = require "../src/reducers"
+  sum, average, delimit} = require "../src/reducers"
 
 Amen.describe "Reducers", (context) ->
 
@@ -50,7 +50,16 @@ Amen.describe "Reducers", (context) ->
     assert (assoc [["foo", 1], ["bar", 2]]).foo == 1
 
   context.test "flatten", ->
-    assert (flatten [1, [2, 3], 4, [5, [6, 7]]])[1] == 2
+    ax = flatten [1, [2, 3], 4, [5, [6, 7], 8]]
+    for i in [1..8]
+      assert.equal ax[i-1], i
+
+    # run the test twice to make sure we don't
+    # accidentally reuse the same result value
+    ax = flatten [1, [2, 3], 4, [5, [6, 7], 8]]
+    for i in [1..8]
+      assert.equal ax[i-1], i
+
 
   context.test "sum", ->
     assert (sum [1..5]) == 15
@@ -58,9 +67,6 @@ Amen.describe "Reducers", (context) ->
   context.test "average", ->
     assert (average [1..5]) == 3
     assert (average [-5..-1]) == -3
-
-  context.test "join", ->
-    assert (join w "one two three") == "onetwothree"
 
   context.test "delimit", ->
     assert (delimit ", ", w "one two three") == "one, two, three"

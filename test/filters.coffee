@@ -8,7 +8,7 @@ Amen = require "amen"
 {value, next} = require "../src/iterator"
 
 {map, accumulate, select, filter, reject, project, compact,
-  partition, take, takeN, where, split, lines, tee,
+  partition, take, takeN, where, lines, tee,
   throttle, pump} = require "../src/filters"
 
 {odd, w} = require "fairmont-helpers"
@@ -95,14 +95,14 @@ Amen.describe "Filters", (context) ->
     assert i().value?
     assert i().done
 
-  context.test "split", ->
-    i = split ((x) -> x.split("\n")), ["one\ntwo\n", "three\nfour"]
-    assert i().value == "one"
-    assert i().value == "two"
-    assert i().value == "three"
-    assert i().value == "four"
-    assert i().done
-
+  # context.test "split", ->
+  #   i = split ((x) -> x.split("\n")), ["one\ntwo\n", "three\nfour"]
+  #   assert i().value == "one"
+  #   assert i().value == "two"
+  #   assert i().value == "three"
+  #   assert i().value == "four"
+  #   assert i().done
+  #
   context.test "lines", ->
     i = lines ["one\ntwo\n", "three\nfour"]
     assert ((yield i()).value) == "one"

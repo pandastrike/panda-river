@@ -134,12 +134,16 @@ takeN = do ->
 
 where = curry (example, i) -> select (query example), i
 
-split = Method.create()
+# TODO: generalize beyond strings
+# Need a combine function to go with the split function?
+# For now, this is just an internal method...used by
+# `lines` below.
+pour = Method.create()
 
-Method.define split, isFunction, isDefined,
-  (f, x) -> split f, (producer x)
+Method.define pour, isFunction, isDefined,
+  (f, x) -> pour f, (producer x)
 
-Method.define split, isFunction, isIterator, (f, i) ->
+Method.define pour, isFunction, isIterator, (f, i) ->
   lines = []
   remainder = ""
   iterator ->
@@ -160,7 +164,7 @@ Method.define split, isFunction, isIterator, (f, i) ->
         {done}
 
 {resolve} = require "when"
-Method.define split, isFunction, isReactor, (f, i) ->
+Method.define pour, isFunction, isReactor, (f, i) ->
   lines = []
   remainder = ""
   reactor async ->
@@ -180,9 +184,9 @@ Method.define split, isFunction, isReactor, (f, i) ->
       else
         {done}
 
-split = curry binary split
+pour = curry binary pour
 
-lines = split (s) -> s.toString().split("\n")
+lines = pour (s) -> s.toString().split("\n")
 
 tee = Method.create()
 
@@ -272,4 +276,4 @@ pump = curry binary pump
 
 module.exports = {map, accumulate, select, filter, reject,
   project, compact, partition, take, takeN, where,
-  split, lines, tee, throttle, pump}
+  lines, tee, throttle, pump}

@@ -96,6 +96,8 @@ Method.define all, isFunction, isReactor,
 
 all = curry binary all
 
+# TODO: find and findLast, with array specializations
+
 zip = Method.create()
 
 Method.define zip, isFunction, isDefined, isDefined,
@@ -123,7 +125,7 @@ _assoc = (object, [key, value]) ->
   object[key] = value
   object
 
-assoc = reduce _assoc, {}
+assoc = (ax) -> reduce _assoc, {}, ax
 
 # TODO: Should flatten be a producer?
 
@@ -134,16 +136,14 @@ _flatten = (ax, a) ->
     ax.push a
     ax
 
-flatten = fold _flatten, []
+flatten = (ax) -> fold _flatten, [], ax
 
-sum = fold add, 0
+sum = (ax) -> fold add, 0, ax
 
 average = (i) ->
   j = 0 # current count
   f = (r, n) -> r += ((n - r)/++j)
   fold f, 0, i
-
-join = fold add, ""
 
 delimit = curry (d, i) ->
   f = (r, s) -> if r == "" then r += s else r += d + s
@@ -151,4 +151,4 @@ delimit = curry (d, i) ->
 
 module.exports = {reduce, fold, reduce, foldr, reduceRight,
   collect, each, start, any, all, zip, assoc, flatten,
-  sum, average, join, delimit}
+  sum, average, delimit}

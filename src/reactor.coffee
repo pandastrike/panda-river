@@ -7,7 +7,7 @@
 either = curry (f, g) -> -> (f arguments...) || (g arguments...)
 
 {Method} = require "fairmont-multimethods"
-{property, query, has, isFunction, isGenerator, isDefined,
+{property, query, has, isFunction, isGeneratorFunction, isDefined,
   isPromise, async} = require "fairmont-helpers"
 
 isReagent = (x) -> (x? && isFunction x[Symbol.asyncIterator])
@@ -26,6 +26,6 @@ Method.define reactor, isFunction, (f) ->
 
 Method.define reactor, isReagent, (i) -> i[Symbol.asyncIterator]()
 
-Method.define reactor, isGenerator, (g) -> g()
+Method.define reactor, isGeneratorFunction, (g) -> g()
 
 module.exports = {isReagent, reactor, isReactor}

@@ -2,10 +2,11 @@
 
 {Method} = require "fairmont-multimethods"
 
-{isFunction, isGenerator, isDefined,
+{isFunction, isGeneratorFunction, isDefined,
   isPromise, async} = require "fairmont-helpers"
 
-isIterable = (x) -> (x? && (isFunction x[Symbol.iterator]) || (isGenerator x))
+isIterable = (x) ->
+  (x? && (isFunction x[Symbol.iterator]) || (isGeneratorFunction x))
 
 isIterator = (x) -> (x? && (isFunction x.next) && (isIterable x))
 
@@ -18,7 +19,7 @@ Method.define iterator, isFunction, (f) ->
 
 Method.define iterator, isIterable, (i) -> i[Symbol.iterator]()
 
-Method.define iterator, isGenerator, (g) -> g()
+Method.define iterator, isGeneratorFunction, (g) -> g()
 
 next = (i) -> i.next()
 value = (x) -> x.value
