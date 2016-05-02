@@ -22,7 +22,7 @@ Method.define iterator, isIterable, (i) -> i[Symbol.iterator]()
 Method.define iterator, isGeneratorFunction, (g) -> g()
 
 next = (i) -> i.next()
-value = (x) -> x.value
-isDone = (x) -> x.done
+value = ({value}) -> value
+isDone = ({done}) -> done
 
 module.exports = {isIterable, iterator, isIterator, next, value, isDone}

@@ -1,39 +1,34 @@
-{EventEmitter} = require "events"
+{isObject} = require "fairmont-helpers"
+{queue} = require "./adapters"
 
-{compose} = require "fairmont-core"
-{isDefined, isArray, isObject,
-  isFunction, property} = require "fairmont-helpers"
-{Method} = require "fairmont-multimethods"
+proxy = (target, handlers) -> new Proxy target, handlers
 
-isSource = compose isFunction, property "on"
+# TODO: add additional supported types
+isObservable = (target) ->
+  isObject target ||
+    isArray target
 
-observe = Method.create()
+observe = (root) ->
 
-Method.define observe, isDefined, (object) ->
-  observe object, new EventEmitter
+  {enqueue, dequeue} = queue()
 
-Method.define observe, isObject, isSource, (object, events) ->
+  handlers =
+    defineProperty: enqueue
+    deleteProperty: enqueue
+    set: (target, key, value) ->
+      target[key] = value
+      enqueue root
 
-  Object.observe object, ->
-    events.emit "change", object
+  observed = []
 
-  for key, value of object
-    do (key, value) ->
-      if isObject value
-        observe value, events
+  _observe = (target) ->
+    for key, value of target when isObservable value
+      unless value in observed
+        observed.push value
+        target[key] = _observe value
+    proxy target, handlers
 
-  events
+  proxy: _observe root
+  reactor: dequeue
 
-Method.define observe, isArray, isSource, (object, events) ->
-
-  Array.observe object, ->
-    events.emit "change", object
-
-  for key, value of object
-    do (key, value) ->
-      if isObject value
-        observe value, events
-
-  events
-
-module.exports = {observe}
+module.exports = {proxy, observe}

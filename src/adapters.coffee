@@ -1,9 +1,13 @@
-_when = require "when"
-{promise, reject, resolve} = _when
-{apply, pipe, curry, compose, binary, identity} = require "fairmont-core"
-{isType, isString, isObject, isEmpty, isFunction, isArray, isDefined, isPromise,
-  property} = require "fairmont-helpers"
+Core = require "fairmont-core"
+Helpers = require "fairmont-helpers"
 {Method} = require "fairmont-multimethods"
+
+{apply, pipe, curry, compose, binary, identity} = Core
+{include, property, isEmpty} = Helpers
+{isType, isDefined} = Helpers
+{isString, isObject, isArray, isFunction} = Helpers
+{promise, follow, isPromise} = Helpers
+
 {producer} = require "./adapters"
 {isIterable, isIterator, isIterator, iterator, next} = require "./iterator"
 {isReagent, isReactor, isReactor, reactor} = require "./reactor"
@@ -18,6 +22,8 @@ Method.define producer, isProducer, identity
 Method.define producer, isPromise, (p) ->
   _p = p.then (x) -> iterator x
   reactor -> _p.then (i) -> next i
+
+repeat = (x) -> (iterator -> done: false, value: x)
 
 _pull = ({done, value}) ->
   if done
@@ -37,101 +43,88 @@ Method.define pull, isIterator, (i) ->
 Method.define pull, isReactor, (i) ->
   reactor -> (next i).then _pull
 
-combine = (px...) ->
-  # this is basically a cut-and-paste job from the implementation
-  # of ::events below...this suggests there might be a common
-  # function here that both of these could be based on
-  count = px.length
+# `queue` and `combine` return reactors because
+# they don't make sense with iterators.
+# That is, you'd just us arrays otherwise.
+
+# create a reactor that can enqueue values
+queue = ->
+
   done = false
   pending = []
   resolved = []
 
-  enqueue = (x) ->
-    if pending.length == 0
-      resolved.push x
-    else
-      p = pending.shift()
-      x
-      .then p.resolve
-      .catch p.reject
+  end = ->
+    done = true
+    resolve {done} for {resolve} in pending
+
+  enqueue = (value) ->
+    unless done
+      if pending.length == 0
+        resolved.push {done, value}
+      else
+        {resolve, reject} = pending.shift()
+        follow value
+        .then (value) -> resolve {done, value}
+        .catch reject
 
   dequeue = ->
     if resolved.length == 0
       if !done
         promise (resolve, reject) -> pending.push {resolve, reject}
       else
-        resolve {done}
+        {done}
     else
       resolved.shift()
 
+  {enqueue, dequeue: (reactor dequeue), end}
+
+# Similar to zip, except that one producer can race out in
+# front of another and we produce values on at a time
+
+combine = (px...) ->
+
+  count = px.length
+  {dequeue, enqueue, end} = queue()
+
   wait = (p) ->
-    x = next p
-    if isPromise x
-      x
-      .then (y) ->
-        wait p
-        enqueue x
-      .catch (e) ->
-        enqueue e
-        count--
-        if count == 0
-          done = true
-    else
-      if !x.done
-        wait p
-        enqueue x
+    follow next p
+    .then ({done, value}) ->
+      if done
+        end() if --count == 0
       else
-        count--
-        if count == 0
-          done = true
+        enqueue value
+        wait p
+    .catch (error) ->
+      enqueue error
 
-  (wait (producer p)) for p in px
+  (wait producer p) for p in px
 
-  reactor dequeue
-
-
-repeat = (x) -> (iterator -> done: false, value: x)
+  dequeue
 
 events = Method.create()
 isSource = compose isFunction, property "on"
 
-Method.define events, isString, isSource, (name, source) ->
-  events {name, end: "end", error: "error"}, source
+do (defaults = end: "end", error: "error") ->
 
-Method.define events, isObject, isSource, (map, source) ->
-  {name, end, error} = map
-  end ?= "end"
-  error ?= "error"
-  done = false
-  pending = []
-  resolved = []
+  Method.define events, isString, isSource, (name, source) ->
+    events (include {name}, defaults), source
 
-  enqueue = (x) ->
-    if pending.length == 0
-      resolved.push x
-    else
-      p = pending.shift()
-      x.then(p.resolve).catch(p.reject)
+  Method.define events, isObject, isSource, (map, source) ->
 
-  dequeue = ->
-    if resolved.length == 0
-      if !done
-        promise (resolve, reject) -> pending.push {resolve, reject}
-      else
-        resolve {done}
-    else
-      resolved.shift()
+    map = include defaults, map
 
-  source.on name, (ax...) ->
-    value = if ax.length < 2 then ax[0] else ax
-    enqueue resolve {done, value}
+    {enqueue, dequeue, end} = queue()
 
-  source.on end, (error) ->
-    done = true
-    enqueue resolve {done}
-  source.on error, (error) -> enqueue reject error
+    source.on map.name, (ax...) ->
+      value = if ax.length < 2 then ax[0] else ax
+      enqueue value
 
-  reactor dequeue
+    source.on map.end, end
+
+    source.on map.error, enqueue
+
+    dequeue
 
 events = curry binary events
 
@@ -152,4 +145,4 @@ Method.define flow, isArray, (ax) -> flow ax...
 Method.define flow, isProducer, isFunctionList,
   (p, fx...) -> apply (pipe fx...), p
 
-module.exports = {producer, pull, repeat, events, stream, flow, combine}
+module.exports = {producer, pull, repeat, queue, events, stream, flow, combine}

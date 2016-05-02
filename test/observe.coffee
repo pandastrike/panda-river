@@ -2,41 +2,26 @@ assert = require "assert"
 Amen = require "amen"
 {promise} = require "when"
 
-{next} = require "../src/iterator"
-{events} = require "../src/adapters"
+{next, value} = require "../src/iterator"
 {observe} = require "../src/observe"
 
 Amen.describe "Observe", (context) ->
-
-  # TODO: this is not a great test, since it doesn't return if it fails
   context.test "change events", ->
-    y = undefined
-    x = value: 7
-    observe x
-    .on "change", (x) -> y = x.value
-    x.value = 3
-    setImmediate -> assert y == 3
+    {proxy, reactor} = observe value: 7
+    setImmediate -> proxy.value = 3
+    assert.deepEqual value: 3,
+      value yield next reactor
 
-    context.test "nested change events", ->
-      y = undefined
-      x = value: value: 7
-      observe x
-      .on "change", (x) -> y = x.value
-      x.value.value = 3
-      setImmediate -> assert y == 3
+    do (proxy, reactor) ->
+      context.test "nested change events", ->
+        {proxy, reactor} = observe value: value: 7
+        setImmediate -> proxy.value.value = 5
+        assert.deepEqual value: value: 5,
+          value yield next reactor
 
-  context.test "for arrays", ->
-    y = undefined
-    x = [1..5]
-    observe x
-    .on "change", (x) -> y = x[3]
-    x[3] = 0
-    setImmediate -> assert y == 0
-
-
-  context.test "as event stream", ->
-    y = undefined
-    x = value: 7
-    i = events "change", observe x
-    x.value = 3
-    assert (yield next i).value.value == 3
+    do (proxy, reactor) ->
+      context.test "for arrays", ->
+        {proxy, reactor} = observe [1..5]
+        setImmediate -> proxy.shift()
+        assert.deepEqual [2..5],
+          value yield next reactor

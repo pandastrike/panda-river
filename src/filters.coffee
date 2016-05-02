@@ -163,7 +163,6 @@ Method.define pour, isFunction, isIterator, (f, i) ->
       else
         {done}
 
-{resolve} = require "when"
 Method.define pour, isFunction, isReactor, (f, i) ->
   lines = []
   remainder = ""

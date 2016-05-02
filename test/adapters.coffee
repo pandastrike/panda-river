@@ -6,10 +6,11 @@ Amen = require "amen"
 
 {next, value, isDone} = require "../src/iterator"
 
-{producer, pull, repeat, events,
+{producer, repeat, pull, queue, events,
   stream, flow, combine} = require "../src/adapters"
 
 {map, lines} = require "../src/filters"
+{collect} = require "../src/reducers"
 
 Amen.describe "Adapters", (context) ->
 
@@ -30,6 +31,19 @@ Amen.describe "Adapters", (context) ->
     # assert next i
     # assert isDone i
 
+  context.test "queue", ->
+    {enqueue, dequeue, end} = queue()
+    enqueue 1
+    setImmediate -> enqueue 2
+    setImmediate -> end()
+    assert.equal 1, (value yield next dequeue)
+    assert.equal 2, (value yield next dequeue)
+    assert.equal true, (isDone yield next dequeue)
+
+  context.test "combine", ->
+    i = combine [1..5], [1..5]
+    assert.equal 10, (yield collect i).length
+
   context.test "events", ->
     i = events "data", createReadStream "test/data/lines.txt"
     assert (yield i()).value.toString() == "one\ntwo\nthree\n"
@@ -41,42 +55,13 @@ Amen.describe "Adapters", (context) ->
     assert (yield i()).done
 
   context.test "flow", ->
-    i = flow [
-      [1..5]
-      map (n) -> n * 2
-    ]
-    assert 2 == value next i
-    assert 4 == value next i
-    assert 6 == value next i
-    assert 8 == value next i
-    assert 10 == value next i
-    assert isDone next i
+    i = flow [1..5], map (n) -> n * 2
+    assert.deepEqual (n * 2 for n in [1..5]),
+      collect i
 
   context.test "flow (reactive)", ->
-
-    i = flow [
-      stream createReadStream "./test/data/lines.txt"
-      lines
-      map (line) -> line[0]
-    ]
-
-    assert (yield i()).value == "o"
-    assert (yield i()).value == "t"
-    assert (yield i()).value == "t"
-    assert (yield i().done)
-
-  context.test "flow (argument list)", ->
-
-    i = flow (stream createReadStream "./test/data/lines.txt"), lines
-
-    assert (yield i()).value == "one"
-    assert (yield i()).value == "two"
-    assert (yield i()).value == "three"
-    assert (yield i().done)
-
-  context.test "combine", ->
-    a = [1..5]
-    b = [1..5]
-    i = combine a, b
-    (assert !(yield (next i)).done) for j in [1..10]
-    assert (yield (next i)).done
+    assert.deepEqual [ "one", "two", "three" ],
+      yield collect flow [
+        stream createReadStream "./test/data/lines.txt"
+        lines
+      ]
