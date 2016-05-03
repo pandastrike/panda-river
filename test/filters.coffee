@@ -1,9 +1,9 @@
 {createReadStream} = require "fs"
 
-_when = require "when"
-
 assert = require "assert"
 Amen = require "amen"
+
+{follow} = require "fairmont-helpers"
 
 {value, next} = require "../src/iterator"
 
@@ -14,7 +14,7 @@ Amen = require "amen"
 {odd, w} = require "fairmont-helpers"
 
 {reactor} = require "../src/reactor"
-counter = (n = 0) -> reactor -> _when {done: false, value: n++}
+counter = (n = 0) -> reactor -> follow {done: false, value: n++}
 
 Amen.describe "Filters", (context) ->
 

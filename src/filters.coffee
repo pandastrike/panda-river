@@ -1,4 +1,3 @@
-_when = require "when"
 {curry, binary, ternary, negate} = require "fairmont-core"
 {isFunction, isDefined, property,
   query, async} = require "fairmont-helpers"
@@ -39,9 +38,11 @@ Method.define select, isFunction, isIterator,
 
 Method.define select, isFunction, isReactor,
   (f, i) ->
-    p = (({done, value}) -> done || (f value))
-    j = -> next i
-    reactor -> _when.iterate j, p, (->), j()
+    reactor async ->
+      loop
+        {done, value} = yield next i
+        break if done || f value
+      {done, value}
 
 select = filter = curry binary select
 
