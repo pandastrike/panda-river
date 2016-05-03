@@ -1,7 +1,7 @@
-{resolve} = require "when"
-
 {identity, curry, binary,
   negate} = require "fairmont-core"
+
+{follow} = require "fairmont-helpers"
 
 # TODO: add this to core?
 either = curry (f, g) -> -> (f arguments...) || (g arguments...)
@@ -17,9 +17,7 @@ isReactor = (x) -> (x? && (isFunction x.next) && (isReagent x))
 reactor = asyncIterator = Method.create()
 
 Method.define reactor, isFunction, (f) ->
-  g = ->
-    x = f arguments...
-    if isPromise x then x else resolve x
+  g = -> follow f arguments...
   g.next = g
   g[Symbol.asyncIterator] = -> g
   g
