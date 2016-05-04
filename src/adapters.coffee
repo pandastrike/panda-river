@@ -27,7 +27,7 @@ repeat = (x) -> (iterator -> done: false, value: x)
 
 _pull = ({done, value}) ->
   if done
-    (_when {done})
+    follow {done}
   else if value?.then?
     value.then (value) -> {done, value}
   else
