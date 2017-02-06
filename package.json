@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "fairmont-core": "1.0.x",
-    "fairmont-helpers": "1.1.x",
+    "fairmont-helpers": "2.0.x",
     "fairmont-multimethods": "1.0.x"
   },
   "engine": "node >= 6.0.0"
