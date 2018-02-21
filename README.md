@@ -1,90 +1,40 @@
-# Fairmont-Reactive
+# Panda River
 
-Fairmont-Reactive is a JavaScript library for functional reactive programming. It's part of the [Fairmont][] library. You can use it by itself, or simply as part of the [Fairmont][] library.
+Panda River is a JavaScript [caveat](#caveat) library for reactive programming in a functional style. River differs from libraries like RxJS by relying on JavaScript iterators and stand-alone functions (rather than method chaining). You can use the same functions whether you're working with arrays or events. And you can use common functional programming patterns, like composition and currying, to build up more powerful libraries.
+
+##### Caveat
+
+River is written in CoffeeScript, in case that's a show-stopper for you. But it's compiled into and otherwise entirely compatible with JavaScript.
+
+Examples are also coded in JavaScript because I prefer to write them that way and because I think they're easier to read. That said, pull requests for JavaScript equivalents are welcome. :smile:
+
+### Example
+
+The _hello world_ of reactive programming is the humble counter. Given:
+
+- `dom.increment`— a link that, when clicked, increments the counter
+- `dom.counter` — an element that displays the counter
+- `data.counter` — the application data, which, in this case, is just a counter
+
+```coffee
+go [
+  events "click", dom.increment
+  map -> data.counter++
+]
+
+go [
+  events "change", observe data
+  map -> dom.counter.textContent = data.counter
+]
+```
 
 ## Installation
 
-`npm install fairmont-reactive`
+`npm install panda-river`
 
-## Examples
-
-Here's a simple reactive Web app implementing a counter using Fairmont's Reactive programming functions.
-
-In JavaScript:
-
-```javascript
-var $ = require("jquery"),
-  F = require("fairmont");
-
-$(function() {
-
-  var data = { counter: 0 };
-
-  F.go([
-    F.events("click", $("a[href='#increment']")),
-    F.map(function() { data.counter++; })
-  ]);
-
-  F.go([
-    F.events("change", F.observe(data)),
-    F.map(function() {
-      $("p.counter")
-        .html(data.counter);
-    })
-  ]);
-});
-
-```
-
-In CoffeeScript:
-
-```coffeescript
-{start, flow, events, map, observe} = require "fairmont-reactive"
-
-$ = require "jquery"
-
-$ ->
-
-  data = counter: 0
-
-  go [
-    events "click", $("a[href='#increment']")
-    map -> data.counter++
-  ]
-
-  go [
-    events "change", observe data
-    map ->
-      $("p.counter")
-      .html data.counter
-  ]
-```
-
-You can run [this example][] or look at our other reactive examples:
-
-- a [todo-list][]
-- an [echo server][]
-- a [Web server][]
-- a [file watcher][]
-
-[this example]:https://github.com/pandastrike/fairmont-reactive/blob/master/examples/web-apps/counter
-[todo-list]:https://github.com/pandastrike/fairmont-reactive/blob/master/examples/web-apps/todo-list
-[echo server]:https://github.com/pandastrike/fairmont-reactive/blob/master/examples/echo-server.litcoffee
-[Web server]:https://github.com/pandastrike/fairmont-reactive/blob/master/examples/web-server.litcoffee
-[file watcher]:https://github.com/pandastrike/fairmont-reactive/blob/master/examples/file-watcher.litcoffee
-
-## Documentation
-
-Check out the [wiki][] for an getting started guides, tutorials, and reference documentation.
-
-## Status
-
-[Fairmont][0] is still under heavy development and is `beta` quality, meaning you should probably not use it in your production code.
 
 ## Roadmap
 
-You can get an idea of what we're planning by looking at the [issues list][200]. If you want something that isn't there, and you think it would be a good addition, please open a ticket.
+You can get an idea of what we're planning by looking at the [issues list][tickets]. If you want something that isn't there, and you think it would be a good addition, please open a ticket.
 
-[tickets]:https://github.com/pandastrike/fairmont/issues
-[Fairmont]:https://github.com/pandastrike/fairmont
-[wiki]:https://github.com/pandastrike/fairmont/wiki
+[tickets]:https://github.com/pandastrike/panda-river/issues

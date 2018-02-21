@@ -1,3 +1,6 @@
+import {print, test} from "amen"
+import {testIterators} from "./iterator"
+
 targets = process.argv[2..]
 
 if targets.length == 0
@@ -11,4 +14,10 @@ if targets.length == 0
     "helpers"
   ]
 
-(require "./#{target}") for target in targets
+do ->
+
+  print await test "Panda River", [
+
+    testIterators test
+
+  ]

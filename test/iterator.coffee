@@ -1,23 +1,23 @@
 assert = require "assert"
-Amen = require "amen"
+import {isIterable, iterator, isIterator,
+  next, value, isDone} from "../src/iterator"
 
-Amen.describe "Iterators", (context) ->
+testIterators = (test) ->
+  test "Iterators", [
 
-  {isIterable, iterator, isIterator,
-    next, value, isDone} = require "../src/iterator"
+    test "isIterable", ->
+      assert isIterable [1..5]
+      assert !(isIterable 7)
 
-  context.test "isIterable", ->
-    assert isIterable [1..5]
-    assert !(isIterable 7)
+    test "iterator", ->
+      i = iterator [1..2]
+      assert 1 == value next i
+      assert 2 == value next i
+      assert isDone next i
 
-  context.test "iterator", ->
-    i = iterator [1..5]
-    assert 1 == value next i
-    assert 2 == value next i
-    assert 3 == value next i
-    assert 4 == value next i
-    assert 5 == value next i
-    assert isDone next i
-
-    context.test "isIterator", ->
+    test "isIterator", ->
       assert isIterator iterator [1..5]
+
+  ]
+
+export {testIterators}
