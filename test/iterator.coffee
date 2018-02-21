@@ -9,7 +9,7 @@ testIterators = (test) ->
       assert isIterable [1..5]
       assert !(isIterable 7)
 
-    test "iterator", ->
+    test "iterator/next/value/isDone", ->
       i = iterator [1..2]
       assert 1 == value next i
       assert 2 == value next i

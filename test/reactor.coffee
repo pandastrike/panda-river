@@ -1,16 +1,20 @@
 assert = require "assert"
-Amen = require "amen"
-{follow} = require "fairmont-helpers"
+import {follow} from "fairmont-helpers"
+import {isReagent, reactor, isReactor} from "../src/reactor"
 
-{isReagent, reactor, isReactor} = require "../src/reactor"
-
-Amen.describe "Reactors", (context) ->
+testReactors = (test) ->
 
   counter = (n = 0) -> reactor -> follow {done: false, value: n++}
 
-  context.test "isReagent", ->
-    assert isReagent counter()
+  test "Reactors", [
 
-  context.test "reactor", ->
-    context.test "isReactor", ->
-      assert isReactor counter()
+    test "isReagent", -> assert isReagent counter()
+
+    test "reactor", [
+
+      test "isReactor", -> assert isReactor counter()
+
+    ]
+  ]
+
+export {testReactors}

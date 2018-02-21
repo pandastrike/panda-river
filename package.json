@@ -27,6 +27,7 @@
   "devDependencies": {
     "amen": "^2.0.4",
     "coffeescript": "^2.2.1",
+    "gulp": "github:gulpjs/gulp#4.0",
     "panda-builder": "^1.1.1",
     "power-assert": "^1.4.4"
   },

@@ -1,5 +1,6 @@
 import {print, test} from "amen"
 import {testIterators} from "./iterator"
+import {testReactors} from "./reactor"
 
 targets = process.argv[2..]
 
@@ -19,5 +20,6 @@ do ->
   print await test "Panda River", [
 
     testIterators test
+    testReactors test
 
   ]
