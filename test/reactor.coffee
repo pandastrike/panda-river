@@ -1,20 +1,29 @@
 assert = require "assert"
 import {follow} from "fairmont-helpers"
+import {iterator, next, value, isDone} from "../src/iterator"
 import {isReagent, reactor, isReactor} from "../src/reactor"
 
 testReactors = (test) ->
 
-  counter = (n = 0) -> reactor -> follow {done: false, value: n++}
+  # emulate an async counter
+  createCounter = (array) ->
+    i = iterator array
+    reactor -> follow next i
 
   test "Reactors", [
 
-    test "isReagent", -> assert isReagent counter()
+    test "isReagent", ->
+      assert isReagent createCounter []
 
-    test "reactor", [
+    test "isReactor", ->
+      assert isReactor createCounter []
 
-      test "isReactor", -> assert isReactor counter()
+    test "reactor/next/value/isDone", ->
+      r = createCounter [1..2]
+      assert 1 == value await next r
+      assert 2 == value await next r
+      assert isDone await next r
 
-    ]
   ]
 
 export {testReactors}
