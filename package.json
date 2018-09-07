@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/dyoder/panda-river.git"
+    "url": "git://github.com/panda-strike/panda-river.git"
   },
   "keywords": [
     "reactive",
@@ -20,44 +20,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "biscotti-cpp": "^1.0.0",
-    "fairmont-core": "1.0.x",
-    "fairmont-helpers": "^3.3.2",
-    "fairmont-multimethods": "1.0.x"
   },
   "devDependencies": {
-    "amen": "^2.0.4",
-    "babel-core": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "biscotti": "^1.2.2",
-    "biscotti-css": "^1.0.0",
-    "biscotti-html": "^1.0.0",
-    "coffee-loader": "^0.9.0",
-    "coffeescript": "^2.2.2",
-    "del": "^3.0.0",
-    "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-coffee": "^3.0.2",
-    "gulp-footer": "^2.0.1",
-    "gulp-header": "^2.0.1",
-    "gulp-pug": "^3.3.0",
-    "gulp-replace": "^0.6.1",
-    "gulp-stylus": "^2.7.0",
-    "gulp-webserver": "^0.9.1",
-    "js-yaml": "^3.10.0",
-    "jstransformer-markdown": "^1.2.1",
-    "jstransformer-stylus": "^1.5.0",
-    "markdown-it": "^8.4.1",
-    "markdown-it-anchor": "^4.0.0",
-    "markdown-it-container": "^2.0.0",
-    "markdown-it-implicit-figures": "^0.6.0",
-    "panda-builder": "^1.1.1",
-    "panda-play": "^1.5.3",
-    "panda-vcss": "^1.0.0",
-    "panda-vdom": "^1.0.0",
-    "power-assert": "^1.4.4",
-    "pug": "^2.0.0-rc.4",
-    "through2": "^2.0.3",
-    "webpack": "^4.1.0"
+    "coffeescript": "^2.3.1",
+    "panda-builder": "^2.0.0"
   },
-  "engine": "node >= 6.1.0"
+  "engine": "node >= 8.10"
 }

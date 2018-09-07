@@ -1,7 +1,3 @@
-.DS_Store
-node_modules
-*.log
-log/
-logs/
-lib/
 build/
+node_modules/
+.DS_Store
