@@ -1,0 +1,12 @@
+### ::
+
+signature
+  name: "isIterator"
+  takes: [ "value" ]
+  returns: "boolean"
+
+::
+
+Returns `true` if _value_ is an iterator.
+
+All iterators are iterable because the `Symbol.iterator` method returns the original iterator.

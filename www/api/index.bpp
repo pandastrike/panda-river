@@ -1,0 +1,33 @@
+# API
+
+::
+
+signature = $ ({name, takes = [], returns}) ->
+  "**#{name}** #{takes.join ", "} &rarr; #{returns}"
+
+example = ({title, description, language = "coffee", code} = {}) ->
+
+  if title?
+    do $ -> "Example: #{title}"
+  else
+    do $ -> "Example"
+
+  if description?
+    do $ -> """
+
+      #{description}
+
+      """
+
+  do $ -> """
+
+    ```#{language}
+    #{code}
+    ```
+
+    """
+
+
+include "_iterators"
+
+::

@@ -7,13 +7,12 @@ isIterable = (x) ->
 
 isIterator = (x) -> (x? && (isFunction x.next) && (isIterable x))
 
-iterator = Method.create()
+iterator = Method.create
+  default: "unable to create iterator from value"
 
 Method.define iterator, isFunction, (f) ->
-  g = -> f arguments...
-  g.next = g
-  g[Symbol.iterator] = -> g
-  g
+  next: f
+  [Symbol.iterator]: -> @
 
 Method.define iterator, isIterable, (i) -> i[Symbol.iterator]()
 

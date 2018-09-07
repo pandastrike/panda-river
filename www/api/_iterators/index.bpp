@@ -1,0 +1,13 @@
+## Iterators
+
+River provides helpers for using [iterators][] in a functional style.
+
+[iterators]:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
+
+::
+
+include "isIterable"
+
+include "isIterator"
+
+::

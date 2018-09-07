@@ -1,0 +1,24 @@
+include _mixins
+
+html
+  head
+    title Panda River
+    +google-font("Raleway", "300", "300i", "500", "500i", "700", "700i")
+    +google-font("Source Code Pro", "400", "700")
+    +rawgit-css("necolas/normalize.css", "normalize.css", "8.0.0")
+    +rawgit-js("PrismJS/prism", "components/prism-core.min.js", "v1.11.0")
+    +rawgit-js("PrismJS/prism", "components/prism-clike.min.js", "v1.11.0")
+    +rawgit-js("PrismJS/prism", "components/prism-javascript.min.js", "v1.11.0")
+    +rawgit-js("PrismJS/prism", "components/prism-coffeescript.min.js", "v1.11.0")
+    +rawgit-css("PrismJS/prism", "themes/prism.css", "v1.11.0")
+    style: include:stylus _site.styl
+    
+    block head
+      
+  body
+    header
+      block header
+    main
+      block main
+    footer  
+      block footer

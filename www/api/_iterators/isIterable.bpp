@@ -1,0 +1,10 @@
+### ::
+
+signature
+  name: "isIterable"
+  takes: [ "value" ]
+  returns: "boolean"
+
+::
+
+Returns `true` if _value_ is iterable
