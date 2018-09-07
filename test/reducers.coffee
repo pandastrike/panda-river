@@ -1,8 +1,8 @@
 assert = require "assert"
 Amen = require "amen"
 
-{identity} = require "fairmont-core"
-{first, add, odd, push, w} = require "fairmont-helpers"
+{identity} = require "panda-garden"
+{first, add, odd, push, w} = require "panda-parchment"
 
 {reduce, fold, reduce, foldr, reduceRight,
   collect, each, start, any, all, zip, assoc, flatten,

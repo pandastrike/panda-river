@@ -1,4 +1,4 @@
-{include} = require "fairmont-helpers"
+{include} = require "panda-parchment"
 include module.exports, require "./iterator"
 include module.exports, require "./reactor"
 include module.exports, require "./adapters"

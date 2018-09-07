@@ -1,6 +1,6 @@
-Core = require "fairmont-core"
-Helpers = require "fairmont-helpers"
-{Method} = require "fairmont-multimethods"
+Core = require "panda-garden"
+Helpers = require "panda-parchment"
+{Method} = require "panda-generics"
 
 {apply, pipe, curry, compose, binary, identity} = Core
 {include, property, isEmpty} = Helpers

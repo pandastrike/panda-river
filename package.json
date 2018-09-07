@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/dyoder/panda-river.git"
+    "url": "git://github.com/panda-strike/panda-river.git"
   },
   "keywords": [
     "reactive",
@@ -20,16 +20,15 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "fairmont-core": "1.0.x",
-    "fairmont-helpers": "2.0.x",
-    "fairmont-multimethods": "1.0.x"
+    "panda-garden": "^1.0.0",
+    "panda-generics": "^4.0.0",
+    "panda-parchment": "^4.0.0"
   },
   "devDependencies": {
-    "amen": "^2.0.4",
-    "coffeescript": "^2.2.1",
-    "gulp": "github:gulpjs/gulp#4.0",
-    "panda-builder": "^1.1.1",
-    "power-assert": "^1.4.4"
+    "amen": "^2.0.5",
+    "babel-preset-env": "^1.7.0",
+    "coffeescript": "^2.3.1",
+    "panda-builder": "^2.0.0"
   },
-  "engine": "node >= 6.1.0"
+  "engine": "node >= 8.10"
 }

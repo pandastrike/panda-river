@@ -1,5 +1,5 @@
 assert = require "assert"
-import {follow} from "fairmont-helpers"
+import {follow} from "panda-parchment"
 import {iterator, next, value, isDone} from "../src/iterator"
 import {isReagent, reactor, isReactor} from "../src/reactor"
 

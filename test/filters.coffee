@@ -3,7 +3,7 @@
 assert = require "assert"
 Amen = require "amen"
 
-{follow} = require "fairmont-helpers"
+{follow} = require "panda-parchment"
 
 {value, next} = require "../src/iterator"
 
@@ -11,7 +11,7 @@ Amen = require "amen"
   partition, take, takeN, where, lines, tee,
   throttle, pump} = require "../src/filters"
 
-{odd, w} = require "fairmont-helpers"
+{odd, w} = require "panda-parchment"
 
 {reactor} = require "../src/reactor"
 counter = (n = 0) -> reactor -> follow {done: false, value: n++}

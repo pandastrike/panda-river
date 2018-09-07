@@ -1,45 +1,31 @@
-import {identity, curry, binary, negate} from "fairmont-core"
-import {Method} from "fairmont-multimethods"
-import {follow, isGeneratorFunction, isType} from "fairmont-helpers"
+import {identity, curry, binary, negate} from "panda-garden"
+import {Method} from "panda-generics"
+import {follow, isFunction, isAsyncFunction, isType} from "panda-parchment"
 
-# can async generators be normal generators that return async iterators?
-# can async iterators be normal iterators that return promises?
-# we take a conservative approach and assume the answer is yes to both
-#
-# thus:
-# - isGeneratorFunctionLike instead of isAsyncGeneratorFunction
-# - isFunctionLike instead of isAsyncFunction
-#
-# also until we know what kind of constructor an async generator returns
-# we're sort of just faking it here ...
+console.log isAsyncFunction
 
-# TODO: add to helpers?
-# isAsyncGeneratorFunction = isType (-> await yield null ).constructor
-# isFunctionLike = isKind Function
-isFunctionLike = (x) -> x.call?
-
-# isGeneratorFunctionLike = (f) ->
-#   (isGeneratorFunction f) || (isAsyncGeneratorFunction f)
-isGeneratorFunctionLike = isGeneratorFunction
+# TODO: move stubs into helpers
+isAsyncGeneratorFunction = -> false
+isFunctionLike = (x) -> x?.apply?
 
 isReagent = isAsyncIterable = (x) ->
-  (x? && isFunctionLike x[Symbol.asyncIterator] ||
-    (isGeneratorFunctionLike x))
-
+  (x? && (isFunction x[Symbol.asyncIterator]) ||
+    (isAsyncGeneratorFunction x))
 
 isReactor = isAsyncIterator = (x) ->
-  (x? && (isFunctionLike x.next) && (isReagent x))
+  (isFunctionLike x?.next) && (x?[Symbol.asyncIterator])
+  (x?.next? && (isReagent x))
 
-reactor = asyncIterator = Method.create()
+reactor = asyncIterator = Method.create
+  default: "unable to create reactor from value"
 
 Method.define reactor, isFunctionLike, (f) ->
-  g = -> follow f arguments...
-  g.next = g
-  g[Symbol.asyncIterator] = -> g
-  g
+  next: f
+  [Symbol.asyncIterator]: -> @
 
-Method.define reactor, isReagent, (i) -> i[Symbol.asyncIterator]()
+Method.define reactor, ((x) -> isFunctionLike x[Symbol.asyncIterator]),
+  (i) -> i[Symbol.asyncIterator]()
 
-Method.define reactor, isGeneratorFunctionLike, (g) -> g()
+Method.define reactor, isAsyncGeneratorFunction, (g) -> g()
 
 module.exports = {isReagent, reactor, isReactor}

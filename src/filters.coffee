@@ -1,7 +1,7 @@
-{curry, binary, ternary, negate} = require "fairmont-core"
+{curry, binary, ternary, negate} = require "panda-garden"
 {isFunction, isDefined, property,
-  query, async} = require "fairmont-helpers"
-{Method} = require "fairmont-multimethods"
+  query, async} = require "panda-parchment"
+{Method} = require "panda-generics"
 {iterator, iteratorFunction, isIterator, next} = require "./iterator"
 {reactor, reactorFunction, isReactor} = require "./reactor"
 {producer} = require "./adapters"
