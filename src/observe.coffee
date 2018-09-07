@@ -1,4 +1,4 @@
-{isObject} = require "fairmont-helpers"
+{isObject} = require "panda-parchment"
 {queue} = require "./adapters"
 
 proxy = (target, handlers) -> new Proxy target, handlers

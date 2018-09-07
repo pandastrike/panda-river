@@ -4,12 +4,12 @@
 
 {producer} = require "./adapters"
 
-{curry, binary, ternary, noOp, negate} = require "fairmont-core"
+{curry, binary, ternary, noOp, negate} = require "panda-garden"
 
 {isFunction, isDefined, isArray, async,
-  first, push, second, add} = require "fairmont-helpers"
+  first, push, second, add} = require "panda-parchment"
 
-{Method} = require "fairmont-multimethods"
+{Method} = require "panda-generics"
 
 next = (i) -> i.next()
 

@@ -1,6 +1,6 @@
-import {identity, curry} from "fairmont-core"
-import {Method} from "fairmont-multimethods"
-import {isFunction, isGeneratorFunction} from "fairmont-helpers"
+import {identity, curry} from "panda-garden"
+import {Method} from "panda-generics"
+import {isFunction, isGeneratorFunction} from "panda-parchment"
 
 isIterable = (x) ->
   (x? && (isFunction x[Symbol.iterator]) || (isGeneratorFunction x))

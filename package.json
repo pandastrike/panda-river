@@ -19,7 +19,11 @@
     "Dan Yoder"
   ],
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "panda-garden": "^1.0.0",
+    "panda-generics": "^4.0.0",
+    "panda-parchment": "^4.0.0"
+  },
   "devDependencies": {
     "amen": "^2.0.5",
     "babel-preset-env": "^1.7.0",

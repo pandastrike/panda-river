@@ -1,6 +1,6 @@
-import {identity, curry, binary, negate} from "fairmont-core"
-import {Method} from "fairmont-multimethods"
-import {follow, isFunction, isAsyncFunction, isType} from "fairmont-helpers"
+import {identity, curry, binary, negate} from "panda-garden"
+import {Method} from "panda-generics"
+import {follow, isFunction, isAsyncFunction, isType} from "panda-parchment"
 
 console.log isAsyncFunction
 
@@ -13,7 +13,7 @@ isReagent = isAsyncIterable = (x) ->
     (isAsyncGeneratorFunction x))
 
 isReactor = isAsyncIterator = (x) ->
-  (isFunctionLike x?.next) && (x?[@@asyncIterator])
+  (isFunctionLike x?.next) && (x?[Symbol.asyncIterator])
   (x?.next? && (isReagent x))
 
 reactor = asyncIterator = Method.create

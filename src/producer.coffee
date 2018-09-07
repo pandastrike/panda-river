@@ -1,5 +1,5 @@
-import {identity} from "fairmont-core"
-import {Method} from "fairmont-multimethods"
+import {identity} from "panda-garden"
+import {Method} from "panda-generics"
 
 {isIterable, isIterator, iterator} = require "./iterator"
 {isReagent, isReactor, reactor} = require "./reactor"

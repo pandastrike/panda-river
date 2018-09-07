@@ -1,6 +1,6 @@
 assert = require "assert"
 Amen = require "amen"
-{promise} = require "fairmont-helpers"
+{promise} = require "panda-parchment"
 
 {next, value} = require "../src/iterator"
 {observe} = require "../src/observe"
