@@ -1,6 +1,6 @@
 {curry, binary, ternary, negate} = require "panda-garden"
 {isFunction, isDefined, property,
-  query, async} = require "panda-parchment"
+  query} = require "panda-parchment"
 {Method} = require "panda-generics"
 {iterator, iteratorFunction, isIterator, next} = require "./iterator"
 {reactor, reactorFunction, isReactor} = require "./reactor"
@@ -12,14 +12,10 @@ Method.define map, isFunction, isDefined,
   (f, x) -> map f, (producer x)
 
 Method.define map, isFunction, isIterator, (f, i) ->
-  iterator ->
-    {done, value} = next i
-    if done then {done} else {done, value: (f value)}
+  do -> yield (f value) for value from i
 
 Method.define map, isFunction, isReactor, (f, r) ->
-  reactor ->
-    (next r).then ({done, value}) ->
-      if done then {done} else {done, value: (f value)}
+  do -> yield (f value) for await value from r
 
 map = curry binary map
 
@@ -38,9 +34,9 @@ Method.define select, isFunction, isIterator,
 
 Method.define select, isFunction, isReactor,
   (f, i) ->
-    reactor async ->
+    reactor ->
       loop
-        {done, value} = yield next i
+        {done, value} = await next i
         break if done || f value
       {done, value}
 
@@ -98,10 +94,10 @@ Method.define partition, Number, isIterator, (n, i) ->
       {value: batch, done}
 
 Method.define partition, Number, isReactor, (n, i) ->
-  reactor async ->
+  reactor ->
     batch = []
     loop
-      {done, value} = yield next i
+      {done, value} = await next i
       break if done
       batch.push value
       break if batch.length == n
@@ -167,11 +163,11 @@ Method.define pour, isFunction, isIterator, (f, i) ->
 Method.define pour, isFunction, isReactor, (f, i) ->
   lines = []
   remainder = ""
-  reactor async ->
+  reactor ->
     if lines.length > 0
       {value: lines.shift(), done: false}
     else
-      {value, done} = yield next i
+      {value, done} = await next i
       if !done
         [first, lines..., last] = f value
         first = remainder + first
@@ -216,9 +212,9 @@ tee = curry binary tee
 
 throttle = curry (ms, i) ->
   last = 0
-  reactor async ->
+  reactor ->
     loop
-      {done, value} = yield next i
+      {done, value} = await next i
       break if done
       now = Date.now()
       break if now - last >= ms

@@ -1,6 +1,7 @@
 import {print, test} from "amen"
 import {testIterators} from "./iterator"
 import {testReactors} from "./reactor"
+import {testFilters} from "./filters"
 
 targets = process.argv[2..]
 
@@ -21,5 +22,6 @@ do ->
 
     testIterators test
     testReactors test
+    testFilters test
 
   ]

@@ -1,11 +1,9 @@
 {createReadStream} = require "fs"
-
 assert = require "assert"
-Amen = require "amen"
 
 {follow} = require "panda-parchment"
 
-{value, next} = require "../src/iterator"
+{next, value, isDone} = require "../src/iterator"
 
 {map, accumulate, select, filter, reject, project, compact,
   partition, take, takeN, where, lines, tee,
@@ -13,100 +11,119 @@ Amen = require "amen"
 
 {odd, w} = require "panda-parchment"
 
+{iterator} = require "../src/iterator"
 {reactor} = require "../src/reactor"
-counter = (n = 0) -> reactor -> follow {done: false, value: n++}
 
-Amen.describe "Filters", (context) ->
+# an interator that counts from n to m
+# and a reactor version of the same thing
+counter = (n, m) ->
+  iterator: [n..m]
+  # convert iterable to async via generator
+  # using do returns the async iterator
+  reactor: -> yield x for await x from [n..m]
 
-  context.test "map", ->
-    i = map Math.sqrt, [1, 4, 9]
-    assert i().value == 1
-    assert i().value == 2
-    assert i().value == 3
-    assert i().done
+# we need to do things with the values
+square = (x) -> x * x
+add = (x, y) -> x + y
 
-  context.test "tee (reactor)", ->
-    n = 0
-    increment = (x) -> n += x
-    i = tee increment, (counter 1)
-    assert 1 == value yield next i
-    assert 2 == value yield next i
-    assert 3 == value yield next i
-    assert 6 == n
+testFilters = (test) ->
 
-  context.test "tee (iterator returning promise values)"
+  spec = (name, {expected, filter, producer: {iterator, reactor}}) ->
 
-  context.test "accumulate", ->
-    add = (x, y) -> x + y
-    i = accumulate add, 0, [1..5]
-    assert (next i).value == 1
-    assert (next i).value == 3
-    assert (next i).value == 6
+    test name, [
+      test "iterator", ->
+        assert.deepEqual expected,
+          (x for x from filter iterator)
 
-  context.test "accumulate (reactor)", ->
-    add = (x, y) -> x + y
-    i = accumulate add, 0, (counter 1)
-    assert (yield next i).value == 1
-    assert (yield next i).value == 3
-    assert (yield next i).value == 6
+      test "reactor", ->
+        assert.deepEqual expected,
+          (x for await x from filter reactor)
+    ]
 
-  context.test "select", ->
-    i = select odd, [1..9]
-    assert i().value == 1
-    assert i().value == 3
+  test "Filters", [
 
-  context.test "select (w/reactor)", ->
-    i = select odd, counter()
-    assert (yield i()).value == 1
-    assert (yield i()).value == 3
+    spec "map",
+      expected: [1, 4, 9, 16]
+      filter: map square
+      producer: counter 1, 4
+    spec "tee",
+      expected: [1..4]
+      filter: tee square
+      producer: counter 1, 4
+    # spec "accumulate",
+    #   expected: [1, 3, 6, 10]
+    #   filter: accumulate add, 0
+    #   producer: counter 1, 4
+    # spec "selector",
+    #   expected: [1, 3, 5]
+    #   filter: select odd
+    #   producer: counter [1..5]
 
-  context.test "reject", ->
-    i = reject odd, [1..9]
-    assert i().value == 2
-    assert i().value == 4
-
-  context.test "project", ->
-    i = project "length", w "one two three"
-    assert i().value == 3
-
-  context.test "compact", ->
-    i = compact [1, null, null, 2]
-    assert i().value == 1
-    assert i().value == 2
-
-  context.test "partition", ->
-    i = partition 2, [0..9]
-    assert i().value[0] == 0
-    assert i().value[0] == 2
-
-  context.test "take", ->
-
-    context.test "takeN", ->
-      i = takeN 3, [0..9]
-      assert i().value == 0
-      assert i().value == 1
-      assert i().value == 2
-      assert i().done
-
-  context.test "where", ->
-    pair = (x, y) -> [x, y]
-    i = where ["a", 1], [["a", 2], ["a", 1], ["b", 1], ["a", 1]]
-    assert i().value?
-    assert i().value?
-    assert i().done
-
-  # context.test "split", ->
-  #   i = split ((x) -> x.split("\n")), ["one\ntwo\n", "three\nfour"]
-  #   assert i().value == "one"
-  #   assert i().value == "two"
-  #   assert i().value == "three"
-  #   assert i().value == "four"
-  #   assert i().done
+    #
+    # test "select (iterator)", ->
+    #   iteratorTest
+  #   test "select", ->
+  #     i = select odd, [1..9]
+  #     assert i().value == 1
+  #     assert i().value == 3
   #
-  context.test "lines", ->
-    i = lines ["one\ntwo\n", "three\nfour"]
-    assert ((yield i()).value) == "one"
-    assert ((yield i()).value) == "two"
-    assert ((yield i()).value) == "three"
-    assert ((yield i()).value) == "four"
-    assert ((yield i()).done)
+  #   test "select (w/reactor)", ->
+  #     i = select odd, counter()
+  #     assert (yield i()).value == 1
+  #     assert (yield i()).value == 3
+  #
+  #   test "reject", ->
+  #     i = reject odd, [1..9]
+  #     assert i().value == 2
+  #     assert i().value == 4
+  #
+  #   test "project", ->
+  #     i = project "length", w "one two three"
+  #     assert i().value == 3
+  #
+  #   test "compact", ->
+  #     i = compact [1, null, null, 2]
+  #     assert i().value == 1
+  #     assert i().value == 2
+  #
+  #   test "partition", ->
+  #     i = partition 2, [0..9]
+  #     assert i().value[0] == 0
+  #     assert i().value[0] == 2
+  #
+  #   test "take", ->
+  #
+  #     test "takeN", ->
+  #       i = takeN 3, [0..9]
+  #       assert i().value == 0
+  #       assert i().value == 1
+  #       assert i().value == 2
+  #       assert i().done
+  #
+  #   test "where", ->
+  #     pair = (x, y) -> [x, y]
+  #     i = where ["a", 1], [["a", 2], ["a", 1], ["b", 1], ["a", 1]]
+  #     assert i().value?
+  #     assert i().value?
+  #     assert i().done
+  #
+  #   # test "split", ->
+  #   #   i = split ((x) -> x.split("\n")), ["one\ntwo\n", "three\nfour"]
+  #   #   assert i().value == "one"
+  #   #   assert i().value == "two"
+  #   #   assert i().value == "three"
+  #   #   assert i().value == "four"
+  #   #   assert i().done
+  #   #
+  #   test "lines", ->
+  #     i = lines ["one\ntwo\n", "three\nfour"]
+  #     assert ((yield i()).value) == "one"
+  #     assert ((yield i()).value) == "two"
+  #     assert ((yield i()).value) == "three"
+  #     assert ((yield i()).value) == "four"
+  #     assert ((yield i()).done)
+  #
+  ]
+
+
+export {testFilters}

@@ -1,11 +1,10 @@
 import {identity, curry} from "panda-garden"
 import {Method} from "panda-generics"
-import {isFunction, isGeneratorFunction} from "panda-parchment"
+import {isKind, isFunction} from "panda-parchment"
 
-isIterable = (x) ->
-  (x? && (isFunction x[Symbol.iterator]) || (isGeneratorFunction x))
+isIterable = (x) -> isFunction x?[Symbol.iterator]
 
-isIterator = (x) -> (x? && (isFunction x.next) && (isIterable x))
+isIterator = (x) -> (isFunction x?.next) && (isIterable x)
 
 iterator = Method.create
   default: "unable to create iterator from value"
@@ -16,7 +15,7 @@ Method.define iterator, isFunction, (f) ->
 
 Method.define iterator, isIterable, (i) -> i[Symbol.iterator]()
 
-Method.define iterator, isGeneratorFunction, (g) -> g()
+Method.define iterator, isIterator, (i) -> i
 
 next = (i) -> i.next()
 value = ({value}) -> value

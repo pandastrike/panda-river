@@ -5,21 +5,18 @@ import {isReagent, reactor, isReactor} from "../src/reactor"
 
 testReactors = (test) ->
 
-  # emulate an async counter
-  createCounter = (array) ->
-    i = iterator array
-    reactor -> follow next i
+  f = -> yield x for await x from [1..2]
 
   test "Reactors", [
 
     test "isReagent", ->
-      assert isReagent createCounter []
+      assert isReagent [Symbol.asyncIterator]: ->
 
     test "isReactor", ->
-      assert isReactor createCounter []
+      assert isReactor reactor f
 
     test "reactor/next/value/isDone", ->
-      r = createCounter [1..2]
+      r = f()
       assert 1 == value await next r
       assert 2 == value await next r
       assert isDone await next r

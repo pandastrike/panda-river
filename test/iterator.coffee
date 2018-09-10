@@ -2,6 +2,8 @@ assert = require "assert"
 import {isIterable, iterator, isIterator,
   next, value, isDone} from "../src/iterator"
 
+import {isFunction} from "panda-parchment"
+
 testIterators = (test) ->
 
   test "Iterators", [
