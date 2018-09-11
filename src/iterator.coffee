@@ -1,6 +1,6 @@
 import {identity, curry} from "panda-garden"
 import {Method} from "panda-generics"
-import {isKind, isFunction} from "panda-parchment"
+import {isKind, isFunction, isGeneratorFunction} from "panda-parchment"
 
 isIterable = (x) -> isFunction x?[Symbol.iterator]
 
@@ -14,6 +14,8 @@ Method.define iterator, isFunction, (f) ->
   [Symbol.iterator]: -> @
 
 Method.define iterator, isIterable, (i) -> i[Symbol.iterator]()
+
+Method.define iterator, isGeneratorFunction, (g) -> g()
 
 Method.define iterator, isIterator, (i) -> i
 

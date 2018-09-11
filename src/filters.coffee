@@ -25,8 +25,12 @@ map = curry binary define
   name: "map"
   description: "Apply a transformation function to an iterator's products."
   terms: [ isFunction ]
-  iterator: (f, i) -> do -> yield (f x) for x from i
-  reactor: (f, r) -> do -> yield (f x) for await x from r
+  iterator: (f, i) -> yield (f x) for x from i
+  reactor: (f, r) -> yield (f x) for await x from r
+
+# project
+
+project = curry (p, i) -> map (property p), i
 
 # accumulate
 
@@ -35,8 +39,8 @@ accumulate = curry ternary define
   description: "Apply a transformation function to an iterator's products,
     producing an accumulated result."
   terms: [ isFunction, isAny ]
-  iterator: (f, k, i) -> do -> yield (k = f k, x) for x from i
-  reactor: (f, k, r) -> do -> yield (k = f k, x) for await x from r
+  iterator: (f, k, i) -> yield (k = f k, x) for x from i
+  reactor: (f, k, r) -> yield (k = f k, x) for await x from r
 
 # select
 
@@ -44,8 +48,16 @@ select = filter = curry binary define
   name: "select"
   description: "Apply a filtering function to products of an iterator."
   terms: [ isFunction ]
-  iterator: (f, i) -> do -> yield x for x from i when f x
-  reactor: (f, r) -> do -> yield x for await x from r when f x
+  iterator: (f, i) -> yield x for x from i when f x
+  reactor: (f, r) -> yield x for await x from r when f x
+
+# reject
+
+reject = curry (f, i) -> select (negate f), i
+
+# compact
+
+compact = select isDefined
 
 # tee
 
@@ -53,9 +65,8 @@ tee = curry binary define
   name: "tee"
   description: "Apply a function to an iterator's products, returning them."
   terms: [ isFunction ]
-  iterator: (f, i) -> do -> yield ((_tee f) x) for x from i
-  reactor: (f, r) -> do -> yield ((_tee f) x) for await x from r
-
+  iterator: (f, i) -> yield ((_tee f) x) for x from i
+  reactor: (f, r) -> yield ((_tee f) x) for await x from r
 
 # partition
 
@@ -65,187 +76,91 @@ partition = curry binary define
   terms: [ isNumber ]
 
   iterator:(n, i) ->
-    do ->
-      batch = []
-      for x from i
-        batch.push x
-        if batch.length == n
-          yield batch
-          batch = []
-      if batch.length > 0
+    batch = []
+    for x from i
+      batch.push x
+      if batch.length == n
         yield batch
+        batch = []
+    if batch.length > 0
+      yield batch
 
   reactor: (n, r) ->
-    do ->
-      batch = []
-      for await x from r
-        batch.push x
-        if batch.length == n
-          yield batch
-          batch = []
-      if batch.length > 0
+    batch = []
+    for await x from r
+      batch.push x
+      if batch.length == n
         yield batch
+        batch = []
+    if batch.length > 0
+      yield batch
 
+# take
 
+take = curry binary define
+  name: "take"
+  description: "Apply a function to each product until it returns false."
+  terms: [ isFunction ]
 
+  iterator: (f, i) ->
+    for x from i
+      if f x
+        yield x
+      else
+        break
 
+  reactor: (f, r) ->
+    for await x from r
+      if f x
+        yield x
+      else
+        break
 
+# limit
 
-
-
-
-
-
-
-
-
-
-reject = curry (f, i) -> select (negate f), i
-
-
-project = curry (p, i) -> map (property p), i
-
-compact = select isDefined
-
-
-
-take = Method.create()
-
-Method.define take, isFunction, isDefined,
-  (f, x) -> take f, (producer x)
-
-Method.define take, isFunction, isIterator,
-  (f, i) ->
-    iterator ->
-      if !done
-        {done, value} = next i
-        if !done && (f value)
-          {value, done: false}
-        else
-          {done: true}
-
-take = curry binary take
-
-takeN = do ->
+limit = do ->
   f = (n, i = 0) -> -> i++ < n
   (n, i) -> take (f n), i
 
-where = curry (example, i) -> select (query example), i
+# pour
 
 # TODO: generalize beyond strings
-# Need a combine function to go with the split function?
-# For now, this is just an internal method...used by
-# `lines` below.
-pour = Method.create()
+# possibly with a 2nd “combine” function?
 
-Method.define pour, isFunction, isDefined,
-  (f, x) -> pour f, (producer x)
+pour = curry binary define
+  name: "pour"
+  description: "Transforms the unit of iteration, ex: from blocks to lines."
+  terms: [ isFunction ]
+  iterator: (f, i) ->
+    remainder = ""
+    for x from i
+      [first, lines..., last] = f x
+      yield remainder + first
+      remainder = last
+      yield line for line in lines
+    if remainder != ""
+      yield remainder
+  reactor: (f, r) ->
+    remainder = ""
+    for await x from r
+      [first, lines..., last] = f x
+      yield remainder + first
+      remainder = last
+      yield line for line in lines
+    if remainder != ""
+      yield remainder
 
-Method.define pour, isFunction, isIterator, (f, i) ->
-  lines = []
-  remainder = ""
-  iterator ->
-    if lines.length > 0
-      {value: lines.shift(), done: false}
-    else
-      {value, done} = next i
-      if !done
-        [first, lines..., last] = f value
-        first = remainder + first
-        remainder = last
-        {value: first, done}
-      else if remainder != ""
-        value = remainder
-        remainder = ""
-        {value, done: false}
-      else
-        {done}
-
-Method.define pour, isFunction, isReactor, (f, i) ->
-  lines = []
-  remainder = ""
-  reactor ->
-    if lines.length > 0
-      {value: lines.shift(), done: false}
-    else
-      {value, done} = await next i
-      if !done
-        [first, lines..., last] = f value
-        first = remainder + first
-        remainder = last
-        {value: first, done}
-      else if remainder != ""
-        value = remainder
-        remainder = ""
-        {value, done: false}
-      else
-        {done}
-
-pour = curry binary pour
+# lines
 
 lines = pour (s) -> s.toString().split("\n")
 
+# throttle
 
-throttle = curry (ms, i) ->
+throttle = debounce = curry (interval, r) ->
   last = 0
-  reactor ->
-    loop
-      {done, value} = await next i
-      break if done
-      now = Date.now()
-      break if now - last >= ms
-    last = now
-    {done, value}
+  for await x from r
+    if (Date.now() - last) >= interval
+      yield x
 
-pump = Method.create()
-
-isStreamLike = (s) ->
-  s? && (isFunction s.write) && (isFunction s.end)
-
-Method.define pump, isStreamLike, isDefined,
-  (s, x) -> pump s, (producer x)
-
-Method.define pump, isStreamLike, isIterator,
-  (s, i) ->
-    iterator ->
-      {done, value} = next i
-      if done then s.end() else s.write value
-      {done, value: s}
-
-Method.define pump, isStreamLike, isReactor,
-  (s, i) ->
-    reactor ->
-      (next i).then ({done, value}) ->
-        if done then s.end() else s.write value
-        {done, value: s}
-
-pump = curry binary pump
-
-# TODO: filter version of flatten
-
-# This version of flatten has very limited scope. It only deals with arrays,
-# not producibles in general. This is good enough for our purposes here, to
-# illlustrate the idea.
-
-# flatten = (i) ->
-#   stack = []
-#   _next = ->
-#     {done, value} = next r
-#     if !done
-#       if isArray value && !empty value
-#         stack.push i
-#         i = product value
-#         do _next
-#       else
-#         {done, value}
-#     else
-#       if !empty stack
-#         i = stack.pop()
-#         do _next
-#       else
-#         {done}
-#   iterator -> do _next
-
-module.exports = {map, accumulate, select, filter, reject,
-  project, compact, partition, take, takeN, where,
-  lines, tee, throttle, pump}
+export {map, project, accumulate, select, filter, reject, compact,
+  tee, partition, take, limit, pour, lines, throttle}

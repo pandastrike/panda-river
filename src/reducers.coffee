@@ -149,6 +149,19 @@ delimit = curry (d, i) ->
   f = (r, s) -> if r == "" then r += s else r += d + s
   fold f, "", i
 
+# pump - seems to belong here rather than in filter
+#
+# isStreamLike = (s) ->
+#   s? && (isFunction s.write) && (isFunction s.end)
+#
+# pump = curry binary define
+#   name: "pump"
+#   description: "Write products to a stream."
+#   terms: [ isStreamLike ]
+#   iterator: (s, i) -> (s.write x) for x from i ; s.end()
+#   reactor: (s, r) -> (s.write x) for await x from r ; s.end()
+
+
 module.exports = {reduce, fold, reduce, foldr, reduceRight,
   collect, each, start, any, all, zip, assoc, flatten,
   sum, average, delimit}
