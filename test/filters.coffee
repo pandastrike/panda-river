@@ -14,13 +14,13 @@ assert = require "assert"
 {iterator} = require "../src/iterator"
 {reactor} = require "../src/reactor"
 
-# an interator that counts from n to m
-# and a reactor version of the same thing
-counter = (n, m) ->
-  iterator: [n..m]
+# iterator and reactor based on a range
+# to produce values used in tests
+counter = (range) ->
+  iterator: range
   # convert iterable to async via generator
   # using do returns the async iterator
-  reactor: -> yield x for await x from [n..m]
+  reactor: -> yield x for await x from range
 
 # we need to do things with the values
 square = (x) -> x * x
@@ -45,19 +45,24 @@ testFilters = (test) ->
     spec "map",
       expected: [1, 4, 9, 16]
       filter: map square
-      producer: counter 1, 4
+      producer: counter [1..4]
+    spec "accumulate",
+      expected: [1, 3, 6, 10]
+      filter: accumulate add, 0
+      producer: counter [1..4]
+    spec "select",
+      expected: [1, 3, 5]
+      filter: select odd
+      producer: counter [1..5]
     spec "tee",
       expected: [1..4]
       filter: tee square
-      producer: counter 1, 4
-    # spec "accumulate",
-    #   expected: [1, 3, 6, 10]
-    #   filter: accumulate add, 0
-    #   producer: counter 1, 4
-    # spec "selector",
-    #   expected: [1, 3, 5]
-    #   filter: select odd
-    #   producer: counter [1..5]
+      producer: counter [1..4]
+    spec "partition",
+      expected: [[1, 2], [3, 4]]
+      filter: partition 2
+      producer: counter [1..4]
+      
 
     #
     # test "select (iterator)", ->

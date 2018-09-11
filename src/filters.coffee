@@ -1,112 +1,113 @@
-{curry, binary, ternary, negate} = require "panda-garden"
-{isFunction, isDefined, property,
-  query} = require "panda-parchment"
+import {isFunction, isDefined, isNumber, property, query} from "panda-parchment"
+import {curry, binary, ternary, negate, tee as _tee} from "panda-garden"
 {Method} = require "panda-generics"
 {iterator, iteratorFunction, isIterator, next} = require "./iterator"
 {reactor, reactorFunction, isReactor} = require "./reactor"
 {producer} = require "./adapters"
+isAny = (x) -> true
 
-map = Method.create()
+define = ({name, description, terms, iterator, reactor}) ->
+  f = Method.create
+    description: description
+    default: (args..., last) ->
+      if args.length == terms.length
+        f args..., producer last
+      else
+        throw "#{name}: wrong number of arguments"
 
-Method.define map, isFunction, isDefined,
-  (f, x) -> map f, (producer x)
+  Method.define f, terms..., isIterator, iterator
+  Method.define f, terms..., isReactor, reactor
+  f
 
-Method.define map, isFunction, isIterator, (f, i) ->
-  do -> yield (f value) for value from i
+# map
 
-Method.define map, isFunction, isReactor, (f, r) ->
-  do -> yield (f value) for await value from r
+map = curry binary define
+  name: "map"
+  description: "Apply a transformation function to an iterator's products."
+  terms: [ isFunction ]
+  iterator: (f, i) -> do -> yield (f x) for x from i
+  reactor: (f, r) -> do -> yield (f x) for await x from r
 
-map = curry binary map
+# accumulate
 
-select = Method.create()
+accumulate = curry ternary define
+  name: "accumulate"
+  description: "Apply a transformation function to an iterator's products,
+    producing an accumulated result."
+  terms: [ isFunction, isAny ]
+  iterator: (f, k, i) -> do -> yield (k = f k, x) for x from i
+  reactor: (f, k, r) -> do -> yield (k = f k, x) for await x from r
 
-Method.define select, isFunction, isDefined,
-  (f, x) -> select f, (producer x)
+# select
 
-Method.define select, isFunction, isIterator,
-  (f, i) ->
-    iterator ->
-      loop
-        {done, value} = next i
-        break if done || (f value)
-      {done, value}
+select = filter = curry binary define
+  name: "select"
+  description: "Apply a filtering function to products of an iterator."
+  terms: [ isFunction ]
+  iterator: (f, i) -> do -> yield x for x from i when f x
+  reactor: (f, r) -> do -> yield x for await x from r when f x
 
-Method.define select, isFunction, isReactor,
-  (f, i) ->
-    reactor ->
-      loop
-        {done, value} = await next i
-        break if done || f value
-      {done, value}
+# tee
 
-select = filter = curry binary select
+tee = curry binary define
+  name: "tee"
+  description: "Apply a function to an iterator's products, returning them."
+  terms: [ isFunction ]
+  iterator: (f, i) -> do -> yield ((_tee f) x) for x from i
+  reactor: (f, r) -> do -> yield ((_tee f) x) for await x from r
+
+
+# partition
+
+partition = curry binary define
+  name: "partition"
+  description: "Batches an interator's products in groups of N."
+  terms: [ isNumber ]
+
+  iterator:(n, i) ->
+    do ->
+      batch = []
+      for x from i
+        batch.push x
+        if batch.length == n
+          yield batch
+          batch = []
+      if batch.length > 0
+        yield batch
+
+  reactor: (n, r) ->
+    do ->
+      batch = []
+      for await x from r
+        batch.push x
+        if batch.length == n
+          yield batch
+          batch = []
+      if batch.length > 0
+        yield batch
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 reject = curry (f, i) -> select (negate f), i
 
-accumulate = Method.create()
-
-Method.define accumulate, isFunction, ((x) -> true), isDefined,
-  (f, k, x) -> accumulate f, k, (producer x)
-
-Method.define accumulate, isFunction, ((x) -> true), isIterator,
-  (f, k, i) ->
-    iterator ->
-      {done, value} = next i
-      if !done
-        k = f k, value
-        {value: k, done: false}
-      else
-        {done}
-
-Method.define accumulate, isFunction, ((x) -> true), isReactor,
-  (f, k, r) ->
-    reactor ->
-      (next r).then ({done, value}) ->
-        if !done
-          k = f k, value
-          {value: k, done: false}
-        else
-          {done}
-
-accumulate = curry ternary accumulate
 
 project = curry (p, i) -> map (property p), i
 
 compact = select isDefined
 
-partition = Method.create()
 
-Method.define partition, Number, isDefined, (n, x) ->
-  partition n, (producer x)
-
-Method.define partition, Number, isIterator, (n, i) ->
-  iterator ->
-    batch = []
-    loop
-      {done, value} = next i
-      break if done
-      batch.push value
-      break if batch.length == n
-    if done && batch.length == 0
-      {done}
-    else
-      {value: batch, done}
-
-Method.define partition, Number, isReactor, (n, i) ->
-  reactor ->
-    batch = []
-    loop
-      {done, value} = await next i
-      break if done
-      batch.push value
-      break if batch.length == n
-    if done && batch.length == 0
-      {done}
-    else
-      {value: batch, done}
-
-partition = curry binary partition
 
 take = Method.create()
 
@@ -184,31 +185,6 @@ pour = curry binary pour
 
 lines = pour (s) -> s.toString().split("\n")
 
-tee = Method.create()
-
-Method.define tee, isFunction, isDefined, (f, x) -> tee f, (producer x)
-
-Method.define tee, isFunction, isReactor, (f, r) ->
-  reactor ->
-    (next r).then ({done, value}) ->
-      unless done
-        # this bit of curious logic ensures that we return a promise
-        # if f is actually async, that is, returns a promise.
-        # that promise will resolve to the original value, but not until
-        # f resolves it. this allows tee to be used when the caller
-        # depends upon f having returned
-        ((f value)?.then? -> {done, value}) || {done, value}
-      else {done}
-
-Method.define tee, isFunction, isIterator, (f, i) ->
-  iterator ->
-    {done, value} = next i
-    unless done
-      # see above...
-      {done, value: ((f value)?.then? -> value) || value}
-    else {done}
-
-tee = curry binary tee
 
 throttle = curry (ms, i) ->
   last = 0
