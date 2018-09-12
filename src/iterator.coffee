@@ -2,7 +2,8 @@ import {identity, curry} from "panda-garden"
 import {Method} from "panda-generics"
 import {isKind, isFunction, isGeneratorFunction} from "panda-parchment"
 
-isIterable = (x) -> isFunction x?[Symbol.iterator]
+isIterable = (x) ->
+  (isFunction x?[Symbol.iterator]) || (isGeneratorFunction x)
 
 isIterator = (x) -> (isFunction x?.next) && (isIterable x)
 
