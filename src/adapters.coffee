@@ -1,148 +1,82 @@
-Core = require "panda-garden"
-Helpers = require "panda-parchment"
-{Method} = require "panda-generics"
+import {Method} from "panda-generics"
+import {identity, curry} from "panda-garden"
+import {promise, isArray, isFunction} from "panda-parchment"
 
-{apply, pipe, curry, compose, binary, identity} = Core
-{include, property, isEmpty} = Helpers
-{isType, isDefined} = Helpers
-{isString, isObject, isArray, isFunction} = Helpers
-{promise, follow, isPromise} = Helpers
+import {isIterable, isIterator, iterator} from "./iterator"
+import {isReagent, isReactor, reactor} from "./reactor"
 
-{producer} = require "./adapters"
-{isIterable, isIterator, isIterator, iterator, next} = require "./iterator"
-{isReagent, isReactor, isReactor, reactor} = require "./reactor"
+# isProducer
 
 isProducer = (x) -> (isIterator x) || (isReactor x)
 
-producer = Method.create()
+# producer
+
+producer = Method.create
+  description: "Attempts to turn its argument into an iterator or reactor."
 
 Method.define producer, isIterable, (x) -> iterator x
 Method.define producer, isReagent, (x) -> reactor x
 Method.define producer, isProducer, identity
-Method.define producer, isPromise, (p) ->
-  _p = p.then (x) -> iterator x
-  reactor -> _p.then (i) -> next i
 
-repeat = (x) -> (iterator -> done: false, value: x)
+# repeat
 
-_pull = ({done, value}) ->
-  if done
-    follow {done}
-  else if value?.then?
-    value.then (value) -> {done, value}
-  else
-    {done, value}
+repeat = (x) -> loop yield x ; return
 
-pull = Method.create()
+# events
 
-Method.define pull, isDefined, (x) -> pull producer x
+events = curry (name, source) ->
+  handler = undefined
+  source.on name, (event) -> handler event
+  loop
+    yield await promise (resolve) -> handler = resolve
 
-Method.define pull, isIterator, (i) ->
-  reactor -> _pull next i
+# stream
 
-Method.define pull, isReactor, (i) ->
-  reactor -> (next i).then _pull
+stream = (s) ->
+  _resolve = _reject = undefined
+  end = false
+  s.on "data", (data) -> _resolve data
+  s.on "error", (error) -> _reject error
+  s.on "end", -> end = true; _resolve()
+  loop
+    data = await promise (resolve, reject) ->
+      _resolve = resolve
+      _reject = reject
+    if end then break else yield data
 
-# `queue` and `combine` return reactors because
-# they don't make sense with iterators.
-# That is, you'd just us arrays otherwise.
+# union
 
-# create a reactor that can enqueue values
-queue = ->
+union = (producers) ->
 
-  done = false
-  pending = []
-  resolved = []
+  product = undefined
 
-  end = ->
-    done = true
-    resolve {done} for {resolve} in pending
+  produce = (x) ->
+    _resolve x
+    product = promise (resolve, reject) -> _resolve = resolve
 
-  enqueue = (value) ->
-    unless done
-      if pending.length == 0
-        resolved.push {done, value}
-      else
-        {resolve, reject} = pending.shift()
-        follow value
-        .then (value) -> resolve {done, value}
-        .catch reject
+  for producer in producers
+    do (producer) -> produce x for await x from producer
 
-  dequeue = ->
-    if resolved.length == 0
-      if !done
-        promise (resolve, reject) -> pending.push {resolve, reject}
-      else
-        {done}
-    else
-      resolved.shift()
+  loop
+    yield await product
 
-  {enqueue, dequeue: (reactor dequeue), end}
-
-# Similar to zip, except that one producer can race out in
-# front of another and we produce values on at a time
-
-combine = (px...) ->
-
-  count = px.length
-  {dequeue, enqueue, end} = queue()
-
-  wait = (p) ->
-    follow next p
-    .then ({done, value}) ->
-      if done
-        end() if --count == 0
-      else
-        enqueue value
-        wait p
-    .catch (error) ->
-      enqueue error
-
-  (wait producer p) for p in px
-
-  dequeue
-
-events = Method.create()
-isSource = compose isFunction, property "on"
-
-do (defaults = end: "end", error: "error") ->
-
-  Method.define events, isString, isSource, (name, source) ->
-    events (include {name}, defaults), source
-
-  Method.define events, isObject, isSource, (map, source) ->
-
-    map = include defaults, map
-
-    {enqueue, dequeue, end} = queue()
-
-    source.on map.name, (ax...) ->
-      value = if ax.length < 2 then ax[0] else ax
-      enqueue value
-
-    source.on map.end, end
-
-    source.on map.error, enqueue
-
-    dequeue
-
-events = curry binary events
-
-stream = events "data"
-
-flow = Method.create()
+# flow
 
 isFunctionList = (fx...) ->
-  for f in fx
-    return false if !isFunction f
+  for f in fx when !isFunction f
+    return false
   true
 
-Method.define flow, isDefined, isFunctionList,
-  (x, fx...) -> flow (producer x), fx...
+flow = Method.create
+  description: "Compose functions and a producer."
+  default: (x, fx...) -> flow (producer x), fx...
+
+Method.define flow, isProducer, isFunction, (p, f) ->
+  map f, p
+
+Method.define flow, isProducer, isFunctionList, (p, fx...) ->
+  flow p, (pipe fx...)
 
 Method.define flow, isArray, (ax) -> flow ax...
 
-Method.define flow, isProducer, isFunctionList,
-  (p, fx...) -> apply (pipe fx...), p
-
-module.exports = {producer, pull, repeat, queue, events, stream, flow, combine}
+export {isProducer, producer, repeat, events, stream, union, flow}
