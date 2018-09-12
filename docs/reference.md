@@ -2,15 +2,15 @@
 
 ## Terms
 
-| term     | meaning                                                      |
-| -------- | ------------------------------------------------------------ |
+|     term | meaning                                                      |
+| -------: | ------------------------------------------------------------ |
 | iterator | An object that follows the [Iterator Protocol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#The_iterator_protocol). |
-| reactor  | Shorthand for an asynchronous iterator, which is an object that follows the [Asynchronous Iterator Protocol](https://github.com/tc39/proposal-async-iteration#async-iterators-and-async-iterables). |
+|  reactor | Shorthand for an [asynchronous iterator](https://github.com/tc39/proposal-async-iteration#async-iterators-and-async-iterables). |
 | producer | An object that's either an iterator or reactor.              |
-| adapter  | A function that transform a value into                       |
-| filter   | A function that transform a producer into another kind of produc |
-| reducer  | A function that transforms a producer into an ordinary value, like an array or a number. |
-| generic  | A function that is polymorphic across one or more of its arguments. |
+|  adapter | A function that transforms a value into a producer.          |
+|   filter | A function that transforms a producer into another kind of producer. |
+|  reducer | A function that transforms a producer into an ordinary value, like an array or a number. |
+|  generic | A function that is polymorphic across one or more of its arguments. |
 
 
 
@@ -65,7 +65,7 @@ _**read** stream &rarr; reactor_
 
 ### tee
 
-### ### map
+### map
 
 ### project
 
@@ -78,6 +78,10 @@ _**read** stream &rarr; reactor_
 ### compact
 
 ### flatten
+
+### junction
+
+### fork
 
 ### partition
 
