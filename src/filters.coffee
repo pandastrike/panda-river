@@ -1,8 +1,8 @@
-import {isFunction, isDefined, isNumber, property, query} from "panda-parchment"
+import {isFunction, isDefined, isNumber, property} from "panda-parchment"
 import {curry, binary, ternary, negate, tee as _tee} from "panda-garden"
 {Method} = require "panda-generics"
-{iterator, iteratorFunction, isIterator, next} = require "./iterator"
-{reactor, reactorFunction, isReactor} = require "./reactor"
+{isIterator} = require "./iterator"
+{isReactor} = require "./reactor"
 {producer} = require "./adapters"
 isAny = (x) -> true
 
@@ -172,4 +172,4 @@ throttle = debounce = curry (interval, r) ->
       yield x
 
 export {map, project, accumulate, select, filter, reject, compact,
-  tee, partition, take, limit, pour, lines, throttle}
+  tee, partition, take, limit, wait, lines, throttle}
