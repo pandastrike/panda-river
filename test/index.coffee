@@ -1,27 +1,20 @@
 import {print, test} from "amen"
-import {testIterators} from "./iterator"
-import {testReactors} from "./reactor"
-import {testFilters} from "./filters"
+import {default as iterators} from "./iterator"
+import {default as reactors} from "./reactor"
+import {default as adapters} from "./adapters"
+import {default as filters} from "./filters"
 
-targets = process.argv[2..]
+# modules = { iterators, reactors, adapters, filters }
+modules = { iterators, reactors, adapters, filters }
+targets = process.env.PANDA_RIVER_TARGETS?.split /\s+/
+targets ?= []
 
-if targets.length == 0
-  targets = [
-    "iterator"
-    "reactor"
-    "adapters"
-    "filters"
-    "reducers"
-    "observe"
-    "helpers"
-  ]
+for target in targets when !modules[target]?
+  console.error "invalid target: '#{target}'"
+  process.exit -1
+
+valid = (module) -> targets.length == 0 || (module in targets)
 
 do ->
-
-  print await test "Panda River", [
-
-    testIterators test
-    testReactors test
-    testFilters test
-
-  ]
+  print await test "Panda River",
+    (test name, module) for name, module of modules when valid name
