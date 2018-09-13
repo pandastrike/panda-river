@@ -1,5 +1,7 @@
 # River API Reference
 
+> These are a work-in progress.
+
 ## Terms
 
 |     term | meaning                                                      |
@@ -120,4 +122,3 @@ _**read** stream &rarr; reactor_
 ### delimit
 
 ### write
-
