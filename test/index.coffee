@@ -3,9 +3,10 @@ import {default as iterators} from "./iterator"
 import {default as reactors} from "./reactor"
 import {default as adapters} from "./adapters"
 import {default as filters} from "./filters"
+import {default as reducers} from "./reducers"
 
 # modules = { iterators, reactors, adapters, filters }
-modules = { iterators, reactors, adapters, filters }
+modules = { iterators, reactors, adapters, filters, reducers }
 targets = process.env.PANDA_RIVER_TARGETS?.split /\s+/
 targets ?= []
 

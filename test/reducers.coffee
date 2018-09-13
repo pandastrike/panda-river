@@ -1,72 +1,70 @@
-assert = require "assert"
-Amen = require "amen"
+import assert from "assert"
+import {test} from "amen"
 
-{identity} = require "panda-garden"
-{first, add, odd, push, w} = require "panda-parchment"
+import {identity} from "panda-garden"
+import {first, add, odd, push, w} from "panda-parchment"
 
-{reduce, fold, reduce, foldr, reduceRight,
-  collect, each, start, any, all, zip, assoc, flatten,
-  sum, average, delimit} = require "../src/reducers"
+import {reduce, fold, foldr, collect, each, start, any, all,
+  sum, average, delimit} from "../src/reducers"
 
-Amen.describe "Reducers", (context) ->
+spec = (name, {expected, reducer, iterable}) ->
 
-  context.test "collect", ->
-    assert (first collect [1..5]) == 1
+  test name, [
+    test "iterator", ->
+      assert.deepEqual expected, reducer iterable
 
-  context.test "each", ->
-    assert !(each ((x) -> x + 1), [1..5])?
+    test "reactor", ->
+      r = -> yield x for await x from iterable
+      assert.deepEqual expected, await reducer r
+  ]
 
-  context.test "fold/reduce", ->
-    assert (fold add, 0, [1..5]) == 15
+export default [
 
-  context.test "foldr/reduceRight", ->
-    assert (foldr add, "", "panama") == "amanap"
+  spec "collect",
+    iterable: [1..5]
+    expected: [1..5]
+    reducer: collect
 
-  context.test "any", ->
-    assert (any odd, [1..9])
-    assert !(any odd, [2, 4, 6])
+  spec "each",
+    iterable: [1..5]
+    expected: undefined
+    reducer: each do (y=1) ->
+      (x) ->
+        assert x == y
+        y = (y % 5) + 1
 
-  context.test "all", ->
-    assert !(all odd, [1..9])
-    assert (all odd, [1, 3, 5])
+  spec "fold/reduce",
+    iterable: [1..5]
+    expected: 15
+    reducer: fold add, 0
 
-  context.test "zip", ->
-    pair = (x, y) -> [x, y]
-    i = zip pair, [1, 2, 3], [4, 5, 6]
-    assert i().value[0] == 1
-    assert i().value[1] == 5
-    assert i().value[0] == 3
-    assert i().done
+  spec "foldr/reduceRight",
+    iterable: "panama"
+    expected: "amanap"
+    reducer: foldr add, ""
 
-  # context.test "unzip", ->
-  #   pair = (x, y) -> [x, y]
-  #   unpair = ([ax, bx], [a, b]) ->
-  #     ax.push a
-  #     bx.push b
-  #     [ax, bx]
-  #   assert (unzip unpair, zip pair, "panama", "canary")[0][0] == "p"
+  spec "any",
+    iterable: [1..5]
+    expected: true
+    reducer: any odd
 
-  context.test "assoc", ->
-    assert (assoc [["foo", 1], ["bar", 2]]).foo == 1
+  spec "all",
+    iterable: [1..5]
+    expected: false
+    reducer: all odd
 
-  context.test "flatten", ->
-    ax = flatten [1, [2, 3], 4, [5, [6, 7], 8]]
-    for i in [1..8]
-      assert.equal ax[i-1], i
+  spec "sum",
+    iterable: [1..5]
+    expected: 15
+    reducer: sum
 
-    # run the test twice to make sure we don't
-    # accidentally reuse the same result value
-    ax = flatten [1, [2, 3], 4, [5, [6, 7], 8]]
-    for i in [1..8]
-      assert.equal ax[i-1], i
+  spec "average",
+    iterable: [1..5]
+    expected: 3
+    reducer: average
 
-
-  context.test "sum", ->
-    assert (sum [1..5]) == 15
-
-  context.test "average", ->
-    assert (average [1..5]) == 3
-    assert (average [-5..-1]) == -3
-
-  context.test "delimit", ->
-    assert (delimit ", ", w "one two three") == "one, two, three"
+  spec "delimit",
+    iterable: [ "one", "two", "three" ]
+    expected: "one, two, three"
+    reducer: delimit ", "
+]
