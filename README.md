@@ -25,3 +25,7 @@ go [
 ## Installation
 
 `npm i panda-river`
+
+## API
+
+- [Reference.](./docs/reference.md)
