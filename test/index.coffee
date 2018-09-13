@@ -13,8 +13,8 @@ for target in targets when !modules[target]?
   console.error "invalid target: '#{target}'"
   process.exit -1
 
-valid = (module) -> targets.length == 0 || (module in targets)
+target = (module) -> targets.length == 0 || (module in targets)
 
 do ->
   print await test "Panda River",
-    (test name, module) for name, module of modules when valid name
+    (test name, module) for name, module of modules when target name

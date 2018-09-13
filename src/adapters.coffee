@@ -1,5 +1,5 @@
 import {Method} from "panda-generics"
-import {identity, curry} from "panda-garden"
+import {identity, curry, pipe} from "panda-garden"
 import {promise, isArray, isFunction} from "panda-parchment"
 
 import {isIterable, isIterator, iterator} from "./iterator"
@@ -26,13 +26,14 @@ repeat = (x) -> loop yield x ; return
 
 events = curry (name, source) ->
   handler = undefined
-  source.on name, (event) -> handler event
+  source.on name, (event) ->
+    handler event
   loop
     yield await promise (resolve) -> handler = resolve
 
-# stream
+# read
 
-stream = (s) ->
+read = (s) ->
   _resolve = _reject = undefined
   end = false
   s.on "data", (data) -> _resolve data
@@ -46,19 +47,26 @@ stream = (s) ->
 
 # union
 
-union = (producers) ->
+union = (px...) ->
 
-  product = undefined
+  _resolve = undefined
+  queue = []
+  i = 0
 
-  produce = (x) ->
-    _resolve x
-    product = promise (resolve, reject) -> _resolve = resolve
+  for p in px
+    do (p) ->
+      for await x from producer p
+        queue.push x
+        _resolve()
+      i++
 
-  for producer in producers
-    do (producer) -> produce x for await x from producer
-
-  loop
-    yield await product
+  while i < px.length
+    await promise (resolve) -> _resolve = resolve
+    # copy queue before yielding values
+    _queue = (x for x in queue); queue = []
+    yield x for x in _queue
+  # resolve the values that came in at the end
+  yield x for x in queue
 
 # flow
 
@@ -71,12 +79,21 @@ flow = Method.create
   description: "Compose functions and a producer."
   default: (x, fx...) -> flow (producer x), fx...
 
-Method.define flow, isProducer, isFunction, (p, f) ->
-  map f, p
-
 Method.define flow, isProducer, isFunctionList, (p, fx...) ->
   flow p, (pipe fx...)
 
+Method.define flow, isProducer, isFunction, (p, f) -> f p
+
 Method.define flow, isArray, (ax) -> flow ax...
 
-export {isProducer, producer, repeat, events, stream, union, flow}
+# TODO: is there a way to determine if result of a flow
+# (function composition) is going to be async or sync?
+# I don't think so, but that means we have to assume
+# async here. We might consider a modifier fn that
+# can tag a flow as sync so we can avoid that.
+go = (args...) ->
+  undefined for await x from flow args...
+  ;;
+
+
+export {isProducer, producer, repeat, events, read, union, flow, go}
