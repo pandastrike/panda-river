@@ -1,6 +1,6 @@
 {
   "name": "panda-river",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "JavaScript reactive programming in a functional style",
   "main": "build/npm/src/index.js",
   "scripts": {
