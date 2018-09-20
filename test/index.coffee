@@ -1,4 +1,4 @@
-import {print, test} from "amen"
+import {print, test, success} from "amen"
 import {default as iterators} from "./iterator"
 import {default as reactors} from "./reactor"
 import {default as adapters} from "./adapters"
@@ -22,3 +22,5 @@ target = (module) -> targets.length == 0 || (module in targets)
 do ->
   print await test "Panda River",
     (test name, module) for name, module of modules when target name
+
+  process.exit if success then 0 else 1
