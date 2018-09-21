@@ -2,6 +2,8 @@ import {identity, curry, binary, negate} from "panda-garden"
 import {Method} from "panda-generics"
 import {isFunction, isType} from "panda-parchment"
 
+Symbol.asyncIterator ?= Symbol "asyncIterator"
+
 isAsyncGeneratorFunction = do ->
   f = -> yield await null
   isType f.constructor
