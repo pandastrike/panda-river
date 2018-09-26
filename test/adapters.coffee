@@ -35,15 +35,14 @@ export default [
       break if i == 5
 
   test "read", ->
-    content = ""
-    for await data from (read createReadStream "test/data/lines.txt")
-      content += data.toString()
-    assert.equal "one\ntwo\nthree\n", content
+    # content = ""
+    # for await data from (read createReadStream "test/data/lines.txt")
+    #   content += data.toString()
+    # assert.equal "one\ntwo\nthree\n", content
 
-  test "union"
-  # test "union", ->
-  #   assert.deepEqual [ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 ],
-  #     (x for await x from (union [1..5], [1..5]))
+  test "union", ->
+    assert.deepEqual [ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 ],
+      (x for await x from (union [1..5], [1..5]))
 
   test "flow", ->
     r = flow [

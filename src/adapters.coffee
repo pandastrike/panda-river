@@ -1,6 +1,6 @@
 import {Method} from "panda-generics"
 import {identity, curry, pipe} from "panda-garden"
-import {promise, isArray, isFunction} from "panda-parchment"
+import {promise, follow, reject, isArray, isFunction} from "panda-parchment"
 
 import {isIterable, isIterator, iterator} from "./iterator"
 import {isReagent, isReactor, reactor} from "./reactor"
@@ -22,51 +22,59 @@ Method.define producer, isProducer, identity
 
 repeat = (x) -> loop yield x ; return
 
+# queue
+
+queue = ->
+  q = []
+  p = []
+  enqueue: (value) ->
+    if p.length > 0
+      resolve = p.shift()
+      resolve value
+    else
+      q.push value
+  dequeue: dq = ->
+    if q.length > 0
+      follow q.shift()
+    else
+      promise (resolve) -> p.push resolve
+  idle: -> p.length == 0 && q.length == 0
+
 # events
 
 events = curry (name, source) ->
-  handler = undefined
-  source.on name, (event) ->
-    handler event
-  loop
-    yield await promise (resolve) -> handler = resolve
+  q = queue()
+  source.on name, (event) -> q.enqueue event
+  loop yield await q.dequeue()
 
 # read
 
 read = (s) ->
-  _resolve = _reject = undefined
+  q = queue()
   end = false
-  s.on "data", (data) -> _resolve data
-  s.on "error", (error) -> _reject error
-  s.on "end", -> end = true; _resolve()
+  s.on "data", (data) -> q.enqueue data
+  s.on "error", (error) -> q.enqueue reject error
+  s.on "end", ->
+    end = true
+    q.enqueue undefined
+
   loop
-    data = await promise (resolve, reject) ->
-      _resolve = resolve
-      _reject = reject
+    data = await q.dequeue()
     if end then break else yield data
 
 # union
 
 union = (px...) ->
-
-  _resolve = undefined
-  queue = []
-  i = 0
-
+  q = queue()
+  done = 0
   for p in px
     do (p) ->
-      for await x from producer p
-        queue.push x
-        _resolve()
-      i++
-
-  while i < px.length
-    await promise (resolve) -> _resolve = resolve
-    # copy queue before yielding values
-    _queue = (x for x in queue); queue = []
-    yield x for x in _queue
-  # resolve the values that came in at the end
-  yield x for x in queue
+      q.enqueue x for await x from p
+      done++
+  loop
+    yield await q.dequeue()
+    break if done == px.length
+  yield await q.dequeue() until q.idle()
 
 # flow
 
