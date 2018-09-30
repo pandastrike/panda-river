@@ -62,9 +62,4 @@ export default [
     filter: lines
     iterable: [ "one\ntwo", "\nthree" ]
 
-  test "wait", ->
-    i =  -> (yield follow x) for x in [1..4]
-    assert.deepEqual [1..4],
-      x for await x from wait i
-
 ]

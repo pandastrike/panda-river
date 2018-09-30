@@ -122,15 +122,6 @@ limit = do ->
   f = (n, i = 0) -> -> i++ < n
   (n, i) -> take (f n), i
 
-# wait
-
-wait = define
-  name: "wait"
-  description: "Wait for products that are promises to resolve."
-  terms: []
-  iterator: (i) -> (yield await x) for x from i
-  reactor: (r) -> (yield await x) for await x from r
-
 # pour
 
 # TODO: generalize beyond strings
@@ -172,4 +163,4 @@ throttle = debounce = curry (interval, r) ->
       yield x
 
 export {map, project, accumulate, select, filter, reject, compact,
-  tee, partition, take, limit, wait, lines, throttle}
+  tee, partition, take, limit, lines, throttle}

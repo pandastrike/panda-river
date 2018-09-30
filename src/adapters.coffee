@@ -1,9 +1,11 @@
 import {Method} from "panda-generics"
-import {identity, curry, pipe} from "panda-garden"
-import {promise, follow, reject, isArray, isFunction} from "panda-parchment"
+import {identity, curry, binary, compose, pipe, flip} from "panda-garden"
+import {promise, follow, reject,
+  isDefined, isArray, isFunction, isPromise} from "panda-parchment"
 
 import {isIterable, isIterator, iterator} from "./iterator"
 import {isReagent, isReactor, reactor} from "./reactor"
+import {start} from "./reducers"
 
 # isProducer
 
@@ -79,29 +81,28 @@ union = (px...) ->
 # flow
 
 isFunctionList = (fx...) ->
-  for f in fx when !isFunction f
-    return false
+  return false for f in fx when !isFunction f
   true
 
 flow = Method.create
   description: "Compose functions and a producer."
-  default: (x, fx...) -> flow (producer x), fx...
 
-Method.define flow, isProducer, isFunctionList, (p, fx...) ->
-  flow p, (pipe fx...)
+# check for promise
 
+Method.define flow, isDefined, isArray, (x, ax) -> flow x, ax...
+Method.define flow, isDefined, isFunctionList, (x, fx...) -> flow x, pipe fx...
+Method.define flow, isDefined, isFunction, (x, f) -> flow (producer x), f
+Method.define flow, isPromise, isFunction, (x, f) -> flow (await x), f
 Method.define flow, isProducer, isFunction, (p, f) -> f p
-
 Method.define flow, isArray, (ax) -> flow ax...
 
-# TODO: is there a way to determine if result of a flow
-# (function composition) is going to be async or sync?
-# I don't think so, but that means we have to assume
-# async here. We might consider a modifier fn that
-# can tag a flow as sync so we can avoid that.
-go = (args...) ->
-  undefined for await x from flow args...
-  ;;
+go = compose start, flow
 
+into = curry binary flip go
 
-export {isProducer, producer, repeat, events, read, union, flow, go}
+wait = curry (filter, producer) ->
+  yield await x for await x from filter producer
+
+export {isProducer, producer, repeat,
+  events, read, union, 
+  flow, go, into, wait}

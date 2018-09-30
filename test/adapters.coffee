@@ -3,14 +3,15 @@ import {createReadStream} from "fs"
 import EventEmitter from "events"
 import {test} from "amen"
 
-import {follow, sleep} from "panda-parchment"
+import {follow} from "panda-parchment"
 
 import {isIterator} from "../src/iterator"
 import {isReactor} from "../src/reactor"
-import {map, tee, wait} from "../src/filters"
+import {map} from "../src/filters"
 
 import {isProducer, producer,
-  repeat, events, read, union, flow, go} from "../src/adapters"
+  repeat, events, read, union,
+  flow, go, into, wait} from "../src/adapters"
 
 export default [
   test "producer", ->
@@ -27,7 +28,7 @@ export default [
     source = new EventEmitter
     do ->
       for i in [1..5]
-        await sleep 1
+        await follow 1
         source.emit "test", i
     j = 1
     for await i from (events "test", source)
@@ -35,10 +36,10 @@ export default [
       break if i == 5
 
   test "read", ->
-    # content = ""
-    # for await data from (read createReadStream "test/data/lines.txt")
-    #   content += data.toString()
-    # assert.equal "one\ntwo\nthree\n", content
+    content = ""
+    for await data from (read createReadStream "test/data/lines.txt")
+      content += data.toString()
+    assert.equal "one\ntwo\nthree\n", content
 
   test "union", ->
     assert.deepEqual [ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 ],
@@ -48,21 +49,54 @@ export default [
     r = flow [
       [1..5]
       map (x) -> x * 2
-      tee -> sleep 1
-      wait
     ]
     assert.deepEqual [ 2, 4, 6, 8, 10 ],
       (x for await x from r)
 
-  test "go", ->
+  test "go", [
+
+    test "with producer", ->
+      results = []
+      await go [
+        [1..5]
+        map (x) -> x * 2
+        map (x) -> results.push x
+      ]
+      assert.deepEqual [ 2, 4, 6, 8, 10 ], results
+
+    test "with promise", ->
+      results = []
+      await go [
+        follow [1..5]
+        map (x) -> x * 2
+        map (x) -> results.push x
+      ]
+      assert.deepEqual [ 2, 4, 6, 8, 10 ], results
+  ]
+
+  test "into", ->
     results = []
     await go [
       [1..5]
-      map (x) -> x * 2
-      tee -> sleep 1
-      wait
-      map (x) -> results.push x
+      map (n) -> [1..n]
+      map into [
+        map (n) -> results.push n
+      ]
     ]
-    assert.deepEqual [ 2, 4, 6, 8, 10 ], results
-
+    assert.deepEqual [
+      1,
+      1, 2,
+      1, 2, 3,
+      1, 2, 3, 4,
+      1, 2, 3, 4, 5
+      ], results
 ]
+
+test "wait", ->
+  results = []
+  await go [
+    [1..5]
+    wait map (x) -> follow x * 2
+    map (x) -> results.push x
+  ]
+  assert.deepEqual [ 2, 4, 6, 8, 10 ], results
