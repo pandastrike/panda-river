@@ -82,5 +82,5 @@ delimit = curry (d, i) ->
   f = (r, s) -> if r == "" then r += s else r += d + s
   fold f, "", i
 
-module.exports = {reduce, fold, reduce, foldr, reduceRight,
+export {reduce, fold, foldr, reduceRight,
   collect, each, start, any, all, sum, average, delimit}

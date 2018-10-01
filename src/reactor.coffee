@@ -26,4 +26,4 @@ Method.define reactor, isAsyncGeneratorFunction, (g) -> g()
 
 Method.define reactor, isReactor, (r) -> r
 
-module.exports = {isReagent, reactor, isReactor}
+export {isReagent, reactor, isReactor}

@@ -24,4 +24,4 @@ next = (i) -> i.next()
 value = ({value}) -> value
 isDone = ({done}) -> done
 
-module.exports = {isIterable, iterator, isIterator, next, value, isDone}
+export {isIterable, iterator, isIterator, next, value, isDone}

@@ -1,6 +1,6 @@
 {
   "name": "panda-river",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "JavaScript reactive programming in a functional style",
   "main": "build/npm/src/index.js",
   "scripts": {
@@ -30,7 +30,7 @@
     "@babel/preset-env": "^7.1.0",
     "amen": "^2.1.0",
     "coffeescript": "^2.3.2",
-    "panda-builder": "^2.3.3"
+    "panda-builder": "^2.4.0"
   },
   "engine": "node >= 8.10"
 }
