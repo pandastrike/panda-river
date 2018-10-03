@@ -46,7 +46,12 @@ queue = ->
 
 events = curry (name, source) ->
   q = queue()
-  source.on name, (event) -> q.enqueue event
+  if source.on?
+    source.on name, (event) -> q.enqueue event
+  else if source.addEventListener?
+    source.addEventListener name, (event) -> q.enqueue event
+  else throw new TypeError "events: source must support
+    `on` or `addEventListener` method"
   loop yield await q.dequeue()
 
 # read
@@ -104,5 +109,5 @@ wait = curry (filter, producer) ->
   yield await x for await x from filter producer
 
 export {isProducer, producer, repeat,
-  events, read, union, 
+  events, read, union,
   flow, go, into, wait}
