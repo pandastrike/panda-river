@@ -1,6 +1,6 @@
 {
   "name": "panda-river",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "description": "JavaScript reactive programming in a functional style",
   "main": "build/npm/src/index.js",
   "scripts": {
@@ -20,7 +20,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "gulp": "github:gulpjs/gulp#4.0",
     "panda-garden": "^3.0.4",
     "panda-generics": "^4.0.2",
     "panda-parchment": "^4.0.4"
@@ -30,6 +29,7 @@
     "@babel/preset-env": "^7.1.0",
     "amen": "^2.1.0",
     "coffeescript": "^2.3.2",
+    "gulp": "github:gulpjs/gulp#v4.0.0",
     "panda-builder": "^2.4.0"
   },
   "engine": "node >= 8.10"
