@@ -4,7 +4,7 @@
   "description": "JavaScript reactive programming in a functional style",
   "main": "build/npm/src/index.js",
   "scripts": {
-    "test": "gulp npm:test"
+    "test": "p9k npm:test"
   },
   "repository": {
     "type": "git",
@@ -20,17 +20,17 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "gulp": "github:gulpjs/gulp#4.0",
-    "panda-garden": "^3.0.4",
-    "panda-generics": "^4.0.2",
-    "panda-parchment": "^4.0.4"
+    "panda-garden": "^3.2.0",
+    "panda-generics": "^4.2.0",
+    "panda-parchment": "^4.2.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.1.0",
+    "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
     "amen": "^2.1.0",
     "coffeescript": "^2.3.2",
-    "panda-builder": "^2.4.0"
+    "panda-9000": "^4.1.0",
+    "panda-builder": "^3.1.0"
   },
   "engine": "node >= 8.10"
 }
