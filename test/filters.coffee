@@ -2,7 +2,7 @@ import {test} from "amen"
 assert = require "assert"
 
 import {map, project, accumulate, select, filter, reject, compact,
-  tee, partition, take, limit, wait, lines, throttle} from "../src/filters"
+  tee, partition, take, limit, lines, throttle} from "../src/filters"
 
 {odd, merge, follow} = require "panda-parchment"
 

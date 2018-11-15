@@ -1,11 +1,11 @@
 import {Method} from "panda-generics"
 import {identity, curry, binary, compose, pipe, flip} from "panda-garden"
-import {promise, follow, reject,
+import {promise, follow, reject, all,
   isDefined, isArray, isFunction, isPromise} from "panda-parchment"
 
 import {isIterable, isIterator, iterator} from "./iterator"
 import {isReagent, isReactor, reactor} from "./reactor"
-import {start} from "./reducers"
+import {start, collect} from "./reducers"
 
 # isProducer
 
@@ -108,6 +108,9 @@ into = curry binary flip go
 wait = curry (filter, producer) ->
   yield await x for await x from filter producer
 
+pool = curry (filter, producer) ->
+  yield x for x in await all collect filter producer
+
 export {isProducer, producer, repeat,
   events, read, union,
-  flow, go, into, wait}
+  flow, go, into, wait, pool}

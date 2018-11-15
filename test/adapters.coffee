@@ -11,7 +11,7 @@ import {map} from "../src/filters"
 
 import {isProducer, producer,
   repeat, events, read, union,
-  flow, go, into, wait} from "../src/adapters"
+  flow, go, into, wait, pool} from "../src/adapters"
 
 export default [
   test "producer", ->
@@ -90,13 +90,27 @@ export default [
       1, 2, 3, 4,
       1, 2, 3, 4, 5
       ], results
-]
 
-test "wait", ->
-  results = []
-  await go [
-    [1..5]
-    wait map (x) -> follow x * 2
-    map (x) -> results.push x
-  ]
-  assert.deepEqual [ 2, 4, 6, 8, 10 ], results
+  test "wait", ->
+    results = []
+    await go [
+      [1..5]
+      wait map (x) -> follow x * 2
+      map (x) -> results.push x
+    ]
+    assert.deepEqual [ 2, 4, 6, 8, 10 ], results
+
+  test "pool", ->
+    results = []
+    await go [
+      [1..5]
+      pool map (x) ->
+        # prove that we don't append to the array until
+        # all the results are in ...
+        follow if results.length == 0 then x * 2
+      map (x) -> results.push x
+    ]
+    assert.deepEqual [ 2, 4, 6, 8, 10 ], results
+
+
+]
