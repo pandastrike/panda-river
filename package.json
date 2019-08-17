@@ -1,6 +1,6 @@
 {
   "name": "panda-river",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "JavaScript reactive programming in a functional style",
   "main": "build/npm/src/index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "panda-parchment": "^5.0.0"
   },
   "devDependencies": {
-    "amen": "2.1.0",
+    "amen": "^3.0.0",
     "panda-9000": "5.0.2",
     "panda-builder": "4.0.13"
   },
