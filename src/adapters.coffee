@@ -1,4 +1,4 @@
-import {Method} from "panda-generics"
+import Method from "panda-generics"
 import {identity, curry, binary, compose, pipe, flip} from "panda-garden"
 import {promise, follow, reject, all,
   isDefined, isArray, isFunction, isPromise} from "panda-parchment"
@@ -7,18 +7,21 @@ import {isIterable, isIterator, iterator} from "./iterator"
 import {isReagent, isReactor, reactor} from "./reactor"
 import {start, collect} from "./reducers"
 
+{create, define} = Method
+
 # isProducer
 
 isProducer = (x) -> (isIterator x) || (isReactor x)
 
 # producer
 
-producer = Method.create
+producer = create
+  name: "producer"
   description: "Attempts to turn its argument into an iterator or reactor."
 
-Method.define producer, isIterable, (x) -> iterator x
-Method.define producer, isReagent, (x) -> reactor x
-Method.define producer, isProducer, identity
+define producer, isIterable, (x) -> iterator x
+define producer, isReagent, (x) -> reactor x
+define producer, isProducer, identity
 
 # repeat
 
@@ -89,17 +92,18 @@ isFunctionList = (fx...) ->
   return false for f in fx when !isFunction f
   true
 
-flow = Method.create
+flow = create
+  name: "flow"
   description: "Compose functions and a producer."
 
 # check for promise
 
-Method.define flow, isDefined, isArray, (x, ax) -> flow x, ax...
-Method.define flow, isDefined, isFunctionList, (x, fx...) -> flow x, pipe fx...
-Method.define flow, isDefined, isFunction, (x, f) -> flow (producer x), f
-Method.define flow, isPromise, isFunction, (x, f) -> flow (await x), f
-Method.define flow, isProducer, isFunction, (p, f) -> f p
-Method.define flow, isArray, (ax) -> flow ax...
+define flow, isDefined, isArray, (x, ax) -> flow x, ax...
+define flow, isDefined, isFunctionList, (x, fx...) -> flow x, pipe fx...
+define flow, isDefined, isFunction, (x, f) -> flow (producer x), f
+define flow, isPromise, isFunction, (x, f) -> flow (await x), f
+define flow, isProducer, isFunction, (p, f) -> f p
+define flow, isArray, (ax) -> flow ax...
 
 go = compose start, flow
 

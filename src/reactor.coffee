@@ -1,6 +1,8 @@
 import {identity, curry, binary, negate} from "panda-garden"
-import {Method} from "panda-generics"
+import Method from "panda-generics"
 import {isFunction, isType} from "panda-parchment"
+
+{create, define} = Method
 
 Symbol.asyncIterator ?= Symbol "asyncIterator"
 
@@ -13,17 +15,19 @@ isReagent = isAsyncIterable = (x) ->
 
 isReactor = isAsyncIterator = (x) -> (isFunction x?.next) && (isReagent x)
 
-reactor = asyncIterator = Method.create
+reactor = asyncIterator = create
+  name: "reactor"
+  description: "produces a reactor from an input"
   default: "unable to create reactor from value"
 
-Method.define reactor, isFunction, (f) ->
+define reactor, isFunction, (f) ->
   next: f
   [Symbol.asyncIterator]: -> @
 
-Method.define reactor, isReagent, (r) -> r[Symbol.asyncIterator]()
+define reactor, isReagent, (r) -> r[Symbol.asyncIterator]()
 
-Method.define reactor, isAsyncGeneratorFunction, (g) -> g()
+define reactor, isAsyncGeneratorFunction, (g) -> g()
 
-Method.define reactor, isReactor, (r) -> r
+define reactor, isReactor, (r) -> r
 
 export {isReagent, reactor, isReactor}

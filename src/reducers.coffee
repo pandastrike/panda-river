@@ -1,6 +1,6 @@
 import {curry, binary, ternary, noOp, negate} from "panda-garden"
 import {isFunction, isDefined, isArray, push, add} from "panda-parchment"
-import {Method} from "panda-generics"
+import Method from "panda-generics"
 import {isIterable, isIterator, iterator} from "./iterator"
 import {isReagent, isReactor, reactor} from "./reactor"
 import {producer} from "./adapters"
@@ -10,6 +10,7 @@ isAny = (x) -> true
 define = ({name, description, terms, iterator, reactor}) ->
 
   f = Method.create
+    name: name
     description: description
     default: -> throw "#{name}: invalid arguments"
 

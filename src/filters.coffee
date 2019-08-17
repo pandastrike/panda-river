@@ -1,13 +1,15 @@
 import {isFunction, isDefined, isNumber, property} from "panda-parchment"
 import {curry, binary, ternary, negate, tee as _tee} from "panda-garden"
-{Method} = require "panda-generics"
-{isIterator} = require "./iterator"
-{isReactor} = require "./reactor"
-{producer} = require "./adapters"
+import Method from "panda-generics"
+import {isIterator} from "./iterator"
+import {isReactor} from "./reactor"
+import {producer} from "./adapters"
+
 isAny = (x) -> true
 
 define = ({name, description, terms, iterator, reactor}) ->
   f = Method.create
+    name: name
     description: description
     default: (args..., last) ->
       if args.length == terms.length
