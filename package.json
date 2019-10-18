@@ -1,6 +1,6 @@
 {
   "name": "panda-river",
-  "version": "5.0.2",
+  "version": "6.0.0",
   "description": "JavaScript reactive programming in a functional style",
   "main": "build/npm/src/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "panda-garden": "^4.0.1",
+    "panda-garden": "^5.0.0",
     "panda-generics": "^6.0.0",
     "panda-parchment": "^5.0.0"
   },
