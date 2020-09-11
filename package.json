@@ -2,7 +2,6 @@
   "name": "panda-river",
   "version": "6.0.0",
   "description": "JavaScript reactive programming in a functional style",
-  "main": "build/npm/src/index.js",
   "scripts": {
     "test": "p9k npm:test"
   },
@@ -15,19 +14,33 @@
     "reactive programming",
     "functional"
   ],
-  "authors": [
-    "Dan Yoder"
+  "contributors": [
+    {
+      "name": "Dan Yoder",
+      "email": "dan@pandastrike.com"
+    },
+    {
+      "name": "David Harper",
+      "email": "david@pandastrike.com"
+    }
+  ],
+  "main": "build/npm/src/index.js",
+  "main:coffee": "src/index.coffee",
+  "files": [
+    "src",
+    "build/npm/src"
   ],
   "license": "MIT",
   "dependencies": {
-    "panda-garden": "^5.0.0",
-    "panda-generics": "^6.0.0",
-    "panda-parchment": "^5.0.0"
+    "@pandastrike/garden": "^8.0.1",
+    "panda-generics": "^6.0.3",
+    "panda-parchment": "^6.0.4"
   },
   "devDependencies": {
     "amen": "^3.0.0",
     "panda-9000": "5.0.2",
-    "panda-builder": "4.0.13"
+    "panda-builder": "4.0.13",
+    "panda-garden": "^5.0.0"
   },
   "engine": "node >= 8.10"
 }
