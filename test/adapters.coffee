@@ -7,7 +7,7 @@ import {follow} from "panda-parchment"
 
 import {isIterator} from "../src/iterator"
 import {isReactor} from "../src/reactor"
-import {map} from "../src/filters"
+import {map, tee} from "../src/filters"
 
 import {isProducer, producer,
   repeat, events, read, union,

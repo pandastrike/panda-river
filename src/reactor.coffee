@@ -1,4 +1,4 @@
-import {identity, curry, binary, negate} from "panda-garden"
+import {identity, curry, binary, negate} from "@pandastrike/garden"
 import Method from "panda-generics"
 import {isFunction, isType} from "panda-parchment"
 

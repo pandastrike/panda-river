@@ -1,5 +1,5 @@
 import {isFunction, isDefined, isNumber, property} from "panda-parchment"
-import {curry, binary, ternary, negate, tee as _tee} from "panda-garden"
+import {curry, binary, ternary, negate, tee as _tee} from "@pandastrike/garden"
 import Method from "panda-generics"
 import {isIterator} from "./iterator"
 import {isReactor} from "./reactor"

@@ -1,5 +1,5 @@
 import Method from "panda-generics"
-import {identity, curry, binary, compose, pipe, flip} from "panda-garden"
+import {identity, curry, binary, flow as _flow, pipe, flip} from "@pandastrike/garden"
 import {promise, follow, reject, all,
   isDefined, isArray, isFunction, isPromise} from "panda-parchment"
 
@@ -99,13 +99,14 @@ flow = create
 # check for promise
 
 define flow, isDefined, isArray, (x, ax) -> flow x, ax...
-define flow, isDefined, isFunctionList, (x, fx...) -> flow x, pipe fx...
+define flow, isDefined, isFunctionList, (x, fx...) -> flow x, pipe fx
 define flow, isDefined, isFunction, (x, f) -> flow (producer x), f
 define flow, isPromise, isFunction, (x, f) -> flow (await x), f
 define flow, isProducer, isFunction, (p, f) -> f p
 define flow, isArray, (ax) -> flow ax...
 
-go = compose start, flow
+# We use garden flow (as _flow) to handle async cases.
+go = _flow [ flow, start ]
 
 into = curry binary flip go
 

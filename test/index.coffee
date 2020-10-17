@@ -1,3 +1,4 @@
+import "source-map-support/register"
 import {print, test, success} from "amen"
 import {default as iterators} from "./iterator"
 import {default as reactors} from "./reactor"

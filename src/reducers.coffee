@@ -1,4 +1,4 @@
-import {curry, binary, ternary, noOp, negate} from "panda-garden"
+import {curry, binary, ternary, noOp, negate} from "@pandastrike/garden"
 import {isFunction, isDefined, isArray, push, add} from "panda-parchment"
 import Method from "panda-generics"
 import {isIterable, isIterator, iterator} from "./iterator"
